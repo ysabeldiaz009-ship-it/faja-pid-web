@@ -1,0 +1,54 @@
+/* Faja PID Web v2.0 · complementos a la interfaz v1.3 */
+:root{--blue:#5ab8ff;--green:#49d9a6;--amber:#e8c47a}
+body{letter-spacing:.004em}
+body:not(.unlocked) .top,body:not(.unlocked) .shell{visibility:hidden}
+.login-gate{position:fixed;z-index:100;inset:0;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 20%,#163857,#09111e 64%);color:#f0f7ff}
+body.unlocked .login-gate{display:none}
+.login-card{width:min(440px,100%);padding:38px;border:1px solid #3c5974;border-radius:24px;background:#121f2e;box-shadow:0 34px 100px #0008}
+.login-mark{font-size:26px;font-weight:900;letter-spacing:.02em}.login-mark span{color:#5fbafa;margin-left:5px}
+.login-card h2{margin:17px 0 4px;font-size:28px}.login-card p{color:#b1c4d5;line-height:1.5}
+.login-card input{width:100%;height:51px;padding:12px 14px;background:#071321;color:white;border:1px solid #536c84;border-radius:11px;font:24px sans-serif;letter-spacing:.13em}
+.login-card button{width:100%;margin-top:16px;min-height:48px}
+.login-card small{color:#ff8693;min-height:23px;display:block;padding-top:7px}
+.login-foot{font-size:11px;color:#7593ad;margin-top:22px}
+.device-hint{font-size:11px;color:#9cbed5;max-width:240px}
+.topinside{max-width:1500px}.shell{max-width:1500px}
+.tabs{justify-content:flex-start;gap:12px}
+.tab{font-size:13px;letter-spacing:.02em}
+.lab-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:24px 0 15px}
+.lab-heading h2{margin:3px 0 5px;font-size:23px}.lab-heading p{font-size:12px;color:var(--muted);margin:0}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.16em;color:#69c8f6}
+.lab-layout{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(350px,1.1fr);gap:14px}
+.lab-select label{margin:0 0 6px}
+select{width:100%;background:#0a1727;border:1px solid #3b5870;color:#e9f5ff;padding:12px;border-radius:10px;font:inherit}
+.lab-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:15px 0 5px}
+.lab-fields>div{min-width:0}
+.lab-fields label{margin:3px 0 6px;font-size:11px}
+.lab-fields input{padding:10px 7px;font-size:14px}
+.math-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.math-actions button{flex:1;white-space:nowrap;font-size:12px}
+.math-result{min-height:300px}
+.math-output{display:flex;flex-direction:column;gap:10px;color:#dfebf8;font-size:14px;line-height:1.5;overflow-x:auto}
+.math-group{background:#0a1727;border:1px solid #223d57;border-radius:11px;padding:15px}
+.math-label{font-size:11px;font-weight:800;color:#80b8df;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px}
+.math-formula{font:19px Georgia,'Cambria Math',serif;white-space:nowrap;overflow:auto;padding:4px 0}
+.math-note{font-size:12px;color:#9fbacf;margin-top:7px}
+.fraction{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.25;min-width:35px}
+.fraction>span:first-child{border-bottom:1px solid #b6d6e9;padding:0 5px 3px}
+.fraction>span:last-child{padding:3px 5px 0}
+.math-success{color:#60d9a8}.math-warning{color:#f1c37d}.math-bad{color:#ff8695}
+.lab-bottom{margin-top:15px}.counter-row{display:flex;gap:14px;flex-wrap:wrap;color:#94c5e7;font-size:13px}
+.checkline{padding:8px 0;border-bottom:1px solid #26384b;color:#b8d1e6;font-size:12px}
+.warn-note{color:#e9c276}
+.plant-extra{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin-top:14px}
+.plant-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.plant-facts .fact{min-height:112px}
+.plant-facts .fact strong{font-size:24px}
+.plant-facts .fact small{display:block;font-size:10px;color:#87a5bb;margin-top:8px;line-height:1.5}
+.timer-state{font-size:12px;margin:12px 0;color:#d7bd80}
+#timerStart{margin:10px 0}
+input[type=password]:focus,select:focus{outline:2px solid #65b7ee;outline-offset:2px}
+@media(max-width:1100px){.lab-layout,.plant-extra{grid-template-columns:1fr}}
+@media(max-width:680px){.lab-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.plant-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.login-card{padding:26px}.tabs{flex-wrap:wrap}.device-hint{display:none}}
+
+.serial-diagnostic{background:#102237;color:#b7d6ee;font-size:12px;padding:8px 22px;text-align:center;border-bottom:1px solid #365371;min-height:34px}

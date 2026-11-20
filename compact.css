@@ -1,0 +1,170 @@
+
+/* ===== V2.1: compacto de pantalla completa; scroll solo en pantallas pequeñas ===== */
+[hidden], canvas[hidden] {display:none!important}
+:root{--panel:#111d2b;--line:#2b4056;--muted:#8ca5b9}
+body.unlocked{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.top{flex:0 0 auto}
+.topinside{max-width:1840px;padding:10px 20px}
+.mark{width:35px;height:35px;border-radius:9px;font-size:17px}
+.brand h1{font-size:14px}
+.brand p{font-size:10px;margin-top:2px}
+.connection button{padding:8px 12px;font-size:12px}
+.pill{padding:7px 11px;font-size:11px}
+.device-hint{font-size:10px;max-width:190px}
+.serial-diagnostic{flex:0 0 auto;min-height:24px;padding:5px 12px;font-size:10px}
+.shell{width:100%;max-width:1840px;flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:0 20px 12px}
+.tabs{flex:0 0 auto;padding:9px 0 7px;gap:8px}
+.tab{padding:7px 13px;font-size:12px}
+.screen.workspace{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;gap:10px}
+.screen.workspace[hidden]{display:none!important}
+.card{padding:14px;border-radius:12px;box-shadow:none}
+.card h3{font-size:14px;margin:0}
+.card-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.subtle{font-size:11px;color:var(--muted)}
+.mini-chip{padding:4px 7px;border:1px solid #365572;border-radius:6px;font-size:10px;color:#9fc2df}
+.compact-heading{margin:0;flex:0 0 auto;align-items:center;min-height:38px}
+.compact-heading h2{font-size:18px;margin:0}
+.compact-heading p{font-size:10px;margin-top:3px}
+.infochip{padding:6px 10px;font-size:10px}
+.kpis.compact-kpis{gap:10px;flex:0 0 auto}
+.compact-kpis>.card{padding:10px 13px;min-height:76px}
+.kpi .caption{font-size:10px;letter-spacing:.055em}
+.compact-kpis .kpi .num{margin:7px 0 0;font-size:31px;line-height:1.1}
+.unit{font-size:12px}
+.subtabs{display:flex;gap:5px;flex:0 0 auto;padding:2px;background:#0d1825;border:1px solid #2a3d50;border-radius:10px;align-self:flex-start}
+.subtab{background:transparent;border:1px solid transparent;border-radius:8px;color:#9db5c8;padding:9px 14px;font-size:11px}
+.subtab.active{background:#23415e;border-color:#3b6385;color:#f2f9ff}
+.subtab:hover:not(:disabled){background:#1b344b}
+.workspace-panel{flex:1;min-height:0;overflow:hidden}
+.workspace-panel[hidden]{display:none!important}
+.monitor-layout{height:100%;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(305px,.72fr);gap:10px;min-height:0}
+.monitor-layout>.card{min-height:0}
+.chart-workspace{display:flex;flex-direction:column;min-height:0}
+.chart-workspace canvas{flex:1;min-height:180px;height:auto}
+.legend{margin-top:9px;gap:12px;font-size:11px;flex:0 0 auto}
+.push-right{margin-left:auto}
+.panel-bottom-line{border-top:1px solid var(--line);padding-top:9px;margin-top:9px;font-size:10px;color:var(--muted)}
+.light-dot{display:inline-block;width:6px;height:6px;background:#45c4aa;border-radius:50%;margin-right:5px}
+.controls-workspace{display:flex;flex-direction:column;min-height:0}
+.controls-workspace label,.plant-control label{font-size:11px;margin:6px 0}
+.reference-control{display:flex;gap:12px;align-items:center}
+.reference-control input[type=range]{flex:1;min-width:0}
+.reference-control input[type=number]{flex:0 0 94px;width:94px;padding:9px 10px;font-size:17px}
+.controls-workspace h4{margin:18px 0 4px;color:#b9d6e9;font-size:12px}
+.three{gap:7px}
+.three input[type=number]{padding:9px 7px;font-size:15px}
+.actions{margin-top:12px;gap:7px}
+.actions button{padding:10px 12px;font-size:12px}
+.hint-note{font-size:11px;color:#aac9dd;margin:10px 0 0}
+.micro-note{font-size:10px;line-height:1.45;color:#91abc1;margin:8px 0 0}
+.controls-workspace>.micro-note{margin-top:auto;padding-top:10px}
+.spec-strip{flex:0 0 auto;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;padding:5px 8px;border:1px solid #273d51;background:#0e1a29;border-radius:8px;font-size:10px;color:#8ca7bc}
+.spec-strip b{color:#d3e3ef;font-weight:650;margin-left:3px}
+.compact-lab{height:100%;display:grid;grid-template-columns:minmax(310px,.88fr) minmax(430px,1.12fr);gap:10px;min-height:0}
+.compact-lab>.card{min-height:0}
+.lab-input-card{display:flex;flex-direction:column;min-height:0}
+.lab-select label{margin:0 0 6px}
+.lab-select select{padding:10px;font-size:12px}
+.lab-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:13px 0 4px;align-content:start;overflow-y:auto;min-height:0}
+.lab-fields label{margin:1px 0 4px;font-size:10px;line-height:1.3}
+.lab-fields input{font-size:14px!important;padding:8px 7px!important}
+.math-actions{flex:0 0 auto;margin:8px 0 3px;gap:6px}
+.math-actions button{padding:9px;font-size:11px}
+.lab-input-card>.micro-note{margin-top:auto}
+.math-result{min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.math-result .card-heading{flex:0 0 auto;margin-bottom:8px}
+.math-output{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;gap:7px;font-size:12px;padding-right:5px}
+.math-group{border-radius:8px;padding:10px 12px}
+.math-label{font-size:10px;margin-bottom:3px}
+.math-formula{font-size:17px;line-height:1.25}
+.math-note{font-size:10px;margin-top:4px}
+.data-layout{height:100%;display:grid;grid-template-columns:minmax(210px,.85fr) minmax(280px,1.15fr) minmax(260px,.9fr);gap:10px;min-height:0}
+.data-layout>.card{min-height:0;display:flex;flex-direction:column}
+.readout-pair{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.readout-pair span{background:#0e1929;border:1px solid #264358;padding:13px;border-radius:8px;font-size:14px;font-weight:700}
+.data-layout .meta{font-size:11px;margin:0 0 10px}
+.data-layout .checkline{padding:12px 0;font-size:11px}
+.important{color:#e0b675;margin-top:auto}
+.log-workspace .log{height:100%;flex:1;min-height:0;font-size:11px;line-height:1.6;overflow:auto}
+.plant-screen{gap:10px}
+.plantbar{flex:0 0 auto;min-height:51px;padding:9px 15px;border-radius:11px;gap:10px}
+.plantbar h2{font-size:17px;margin:0}
+.plantbar p{font-size:10px;margin-top:3px}
+.state{font-size:11px;padding:9px 12px}
+.plantmetrics{flex:0 0 auto;margin:0;gap:10px;grid-template-columns:1.2fr 1fr 1fr}
+.plantmetric{min-height:82px;padding:10px 14px}
+.plantmetric .num{font-size:32px;line-height:1.15;margin:7px 0 0}
+.plant-workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(390px,.75fr);gap:10px}
+.plant-left{display:grid;grid-template-rows:minmax(145px,.73fr) minmax(230px,1.27fr);min-height:0;gap:10px}
+.plant-right{display:grid;grid-template-rows:minmax(265px,1fr) minmax(125px,.53fr) auto;min-height:0;gap:10px}
+.plant-visual{min-height:0;display:flex;flex-direction:column}
+.plant-visual>.belt{flex:1;min-height:80px;height:auto;max-height:160px;margin:2px 0 6px}
+.plant-visual .belt .track{top:32%;height:38%;left:9%;right:9%}
+.plant-visual .belt .wheel{top:37%;width:31px;height:31px}
+.plant-visual .belt .wheel::after{left:9px;height:20px}
+.plant-visual .belttext{font-size:11px}
+.plant-electric{min-height:0;display:flex;flex-direction:column}
+.plant-facts{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px}
+.plant-facts .fact{min-width:0;min-height:0;padding:12px}
+.plant-facts .fact span{font-size:10px}
+.plant-facts .fact strong{font-size:23px;line-height:1.2;white-space:nowrap;margin-top:5px}
+.plant-facts .fact small{font-size:9px;margin-top:6px;line-height:1.3}
+.plant-facts .fact strong .u{display:inline;font-size:11px;color:#a3c4dd;font-weight:500}
+.plant-control{min-height:0;display:flex;flex-direction:column}
+.plant-control .card-heading{margin-bottom:8px}
+.plant-control .reference-control{margin:2px 0 8px}
+.plant-control .reference-control input[type=number]{flex-basis:75px;width:75px}
+.plant-control .preset{margin:4px 0 0;gap:6px}
+.plant-control .preset button{font-size:11px;padding:10px 4px;white-space:nowrap}
+.plant-control .bigbuttons{margin-top:13px;gap:8px}
+.plant-control .bigbuttons button{min-height:45px;font-size:13px}
+.plant-control .alarm{margin-top:12px;padding:10px;font-size:11px;line-height:1.35}
+.plant-timer{min-height:0}
+.timer-inline{display:flex;align-items:center;gap:10px}
+.timer-inline label{font-size:11px;white-space:nowrap;margin:0}
+.timer-inline input{padding:8px 9px;font-size:14px;width:75px}
+.timer-inline button{flex:1;font-size:11px;padding:9px 6px;white-space:nowrap}
+.timer-state{font-size:10px;color:#e6b85a;margin:9px 0 0}
+.safety-note{color:#839bae;font-size:10px;text-align:center;margin:0;align-self:center}
+.plant-screen>.footer{display:none}
+.plant-screen canvas[hidden]{display:none!important}
+@media(min-width:1120px) and (min-height:740px){
+ html,body{overflow:hidden}
+ body.unlocked{height:100dvh;overflow:hidden}
+}
+@media(max-width:1119px),(max-height:739px){
+ body.unlocked{height:auto;min-height:100vh;display:block;overflow:auto}
+ .shell{overflow:visible;min-height:0;padding-bottom:30px}
+ .screen.workspace{display:block;overflow:visible}
+ .workspace-panel{overflow:visible}
+ .monitor-layout,.compact-lab,.data-layout,.plant-workspace{height:auto;display:grid;grid-template-columns:1fr}
+ .chart-workspace canvas{height:270px;flex:auto}
+ .plant-left,.plant-right{display:flex;flex-direction:column;gap:10px}
+ .plant-visual>.belt{height:145px;min-height:145px}
+ .plant-facts{grid-template-rows:auto}
+ .plant-timer,.plant-control{min-height:0}
+ .subtabs{max-width:100%;overflow-x:auto}
+ .subtab{white-space:nowrap}
+ .math-output{max-height:520px}
+ .lab-fields{max-height:none}
+ .data-layout>.card{min-height:180px}
+}
+@media(max-width:640px){
+ .compact-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .plantmetrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .plant-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .reference-control input[type=number]{flex-basis:70px;width:70px}
+ .spec-strip{justify-content:flex-start;gap:8px}
+ .plant-timer .timer-inline{flex-wrap:wrap}
+ .plant-control .preset{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* Unidades y valores en la misma linea */
+.plant-facts .fact strong > span {display:inline!important;font:inherit!important;color:inherit}
+.plant-facts .fact strong > small.u {display:inline!important}
+
+
+/* Modelo virtual: distingue estimacion de medicion real. */
+#tempSimCard{border:1px solid #66572e;background:#201d19}
+#tempSimCard strong{color:#eac784}
+#tempSimCard small{color:#d4bc83}

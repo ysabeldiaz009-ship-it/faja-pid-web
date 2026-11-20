@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Faja PID Web · Planta y laboratorio</title>
+<style>
+:root{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#e6edf7;background:#0a101b;--bg:#0a101b;--panel:#131e2c;--line:#293c50;--muted:#8da6bd;--blue:#49abf5;--green:#38cf9b;--red:#ff6576;--amber:#e6b65c}
+*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:2px solid #77c7ff;outline-offset:3px}
+.shell{max-width:1420px;margin:auto;padding:0 22px 28px}.top{border-bottom:1px solid var(--line);background:#101a28}
+.topinside{max-width:1420px;margin:auto;padding:17px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#156cb1,#243a87);font-weight:900;font-size:21px}
+.brand h1{font-size:17px;margin:0;letter-spacing:.04em}.brand p{color:var(--muted);font-size:12px;margin:4px 0 0}
+.connection{display:flex;align-items:center;gap:10px}.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid #35516b;padding:9px 13px;border-radius:100px;color:#a7bfd6;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#8192a5}.dot.on{background:var(--green);box-shadow:0 0 0 4px #1d5349}
+button{border:1px solid #39536a;background:#25394d;color:#eaf3fe;border-radius:10px;padding:10px 16px;font-weight:650}button:hover:not(:disabled){filter:brightness(1.12)}button.blue{background:#1379c7;border-color:#178cd9}button.green{background:#167f61;border-color:#19a77e}button.red{background:#aa3544;border-color:#cb4b5c}
+.tabs{display:flex;gap:8px;justify-content:flex-end;padding:19px 0 16px}.tab{padding:10px 19px;background:transparent;color:#91a8bf;border-color:transparent}.tab.active{background:#1e3349;color:white;border-color:#395a75}
+.screen[hidden]{display:none!important}.sectiontitle{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:6px 0 17px;flex-wrap:wrap}
+.sectiontitle h2{font-size:24px;margin:0 0 5px}.sectiontitle p{margin:0;color:var(--muted);font-size:13px}.infochip{font-size:12px;color:#bfd4e7;background:#1a2a3e;border:1px solid #344d67;border-radius:20px;padding:7px 11px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}
+.kpi .caption{color:#9fb6cb;font-size:12px;font-weight:700;letter-spacing:.08em}.kpi .num{font-size:36px;letter-spacing:-.035em;font-weight:750;margin:12px 0 3px}.unit{font-size:14px;color:var(--muted);font-weight:500}.subtext{color:#829fb7;font-size:12px}
+.gridmain{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:14px;margin-top:14px}.card h3{font-size:16px;margin:0 0 6px}.meta{font-size:12px;color:var(--muted);margin:0 0 15px}
+canvas{display:block;width:100%;height:310px;border-radius:12px;background:#0c1624;border:1px solid #21364b}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#a6bed2;margin-top:12px}.swatch{display:inline-block;height:3px;width:20px;vertical-align:middle;margin-right:5px}
+label{font-size:12px;color:#a9c1d6;display:block;margin:12px 0 6px}input[type=number]{width:100%;background:#0b1522;border:1px solid #38516b;border-radius:9px;color:#edf6ff;padding:12px;font-size:16px}input[type=range]{width:100%;accent-color:#48a9f5}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}.actions button{flex:1;white-space:nowrap}
+.note{font-size:12px;color:#a3bbd0;line-height:1.55}.divider{border-top:1px solid var(--line);margin:19px 0}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.fact{background:#0d1827;border-radius:10px;padding:13px}.fact span{font-size:11px;color:var(--muted);display:block}.fact strong{font-size:17px;display:block;margin-top:8px}
+.log{height:135px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px Consolas,monospace;color:#bfd1e0}
+.plantbar{background:#162435;border:1px solid #34506c;border-radius:16px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.plantbar h2{margin:0 0 5px;font-size:23px}.plantbar p{margin:0;color:var(--muted);font-size:13px}
+.state{font-weight:800;font-size:12px;letter-spacing:.08em;padding:12px 18px;border-radius:9px;background:#324358;color:#d1deed}.state.running{background:#155b49;color:#a5ffe2}.state.fault{background:#803043;color:#fff0f0}
+.plantmetrics{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px;margin-top:14px}.plantmetric{min-height:150px}.plantmetric .num{font-size:51px;margin:15px 0}.plantmetric:first-child .num{color:#5ee7b4}
+.plantgrid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;margin-top:14px}.belt{position:relative;background:#0c1725;border:1px solid #31475f;border-radius:14px;height:145px;overflow:hidden;margin:14px 0}
+.belt .track{position:absolute;top:44px;left:9%;right:9%;height:50px;border-radius:24px;background:repeating-linear-gradient(116deg,#2d4a61 0 14px,#344f65 14px 28px);border:3px solid #627f93}
+.belt .wheel{position:absolute;top:52px;width:35px;height:35px;border:4px solid #a8bac9;border-radius:50%;background:#13283c}.belt .left{left:9%}.belt .right{right:9%}
+.belt .wheel::after{content:"";position:absolute;left:10px;top:1px;width:5px;height:24px;background:#9bd2f2;transform:rotate(35deg)}
+.belt.moving .wheel{animation:spin var(--spin,1s) linear infinite}.belt.moving .track{animation:move var(--track,1s) linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes move{to{background-position:28px 0}}
+.belttext{text-align:center;font-size:12px;color:var(--muted);margin-top:5px}
+.plant-control .target{display:flex;gap:13px;align-items:center}.plant-control .target input{max-width:130px}
+.preset{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.preset button{padding:11px 3px}
+.bigbuttons{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:22px}.bigbuttons button{min-height:68px;font-size:17px}
+.alarm{margin-top:12px;border-left:4px solid #546c83;background:#0e1a2a;padding:13px;font-size:13px;color:#bcd0e4;line-height:1.4}
+.alarm.danger{border-color:var(--red);background:#3d1f2c;color:#ffdce1}.alarm.warn{border-color:var(--amber)}
+.footer{color:#718ba3;font-size:12px;margin:20px 0 0}.desktopnote{font-size:12px;color:#8faabd}
+@media(max-width:1000px){.gridmain,.plantgrid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.shell{padding:0 12px 20px}.topinside{padding:13px 12px}.plantmetrics{grid-template-columns:1fr}.kpi .num{font-size:29px}.plantmetric{min-height:115px}.plantmetric .num{font-size:39px}.bottom{grid-template-columns:1fr}.card{padding:15px}.tabs{justify-content:stretch}.tab{flex:1}.plantbar{padding:16px}.sectiontitle h2{font-size:21px}}
+
+.card{box-shadow:0 8px 32px rgba(0,0,0,.11)}
+.kpi .num{font-variant-numeric:tabular-nums}
+button{transition:background-color .15s ease,border-color .15s ease,filter .15s ease}
+button:active:not(:disabled){transform:translateY(1px)}
+.kpi:nth-child(2){border-color:#27506a}
+.plantmetric:first-child{border-color:#2b675c}
+.meta{line-height:1.45}.note{margin:10px 0}
+.alarm{border-radius:8px}
+</style><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./compact.css"><link rel="stylesheet" href="./comparison.css"></head>
+<body><div id="pinGate" class="login-gate">
+ <div class="login-card">
+  <div class="login-mark">PID<span>WEB</span></div>
+  <h2>Control de Faja</h2>
+  <p>Laboratorio de Sistemas de Control Discreto</p>
+  <label for="pinInput">PIN de acceso</label>
+  <input id="pinInput" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="••••">
+  <button id="pinEnter" class="blue">Entrar al panel</button>
+  <small id="pinError" role="alert"></small>
+  <div class="login-foot">Proyecto académico temporal · Barrera visual, no autenticación segura</div>
+ </div>
+</div><header class="top"><div class="topinside">
+<div class="brand"><div class="mark">PID</div><div><h1>FAJA PID WEB · CONTROL DISCRETO</h1><p>Control de velocidad · ESP32 por USB</p></div></div>
+<div class="connection"><span class="pill"><span id="connDot" class="dot"></span><span id="connStatus">SIN CONEXIÓN</span></span><button id="connect" class="blue">Conectar ESP32</button><span id="deviceHint" class="device-hint">USB: pendiente</span></div>
+</div></header>
+<div id="serialDiagnostic" class="serial-diagnostic" role="status" aria-live="polite">Conecta el ESP32 desde Chrome o Edge. USB sin Wi-Fi.</div>
+<div class="shell"><nav class="tabs" aria-label="Seleccionar vista"><button id="projectTab" class="tab active" aria-pressed="true">PROYECTO · Ingeniería</button><button id="plantTab" class="tab" aria-pressed="false">PLANTA · Operación</button><button id="comparisonTab" class="tab" aria-pressed="false">COMPARACIÓN · Resultados</button></nav>
+
+<div class="screen workspace project-screen" id="projectScreen">
+  <div class="sectiontitle compact-heading">
+    <div><h2>Laboratorio de control discreto</h2><p>Monitoreo, sintonización y modelamiento del motor</p></div>
+    <span class="infochip" id="projectState">Sin conexión</span>
+  </div>
+  <div class="kpis compact-kpis">
+    <div class="card kpi"><div class="caption">REFERENCIA</div><div class="num"><span id="projSet">120</span> <span class="unit">RPM</span></div></div>
+    <div class="card kpi"><div class="caption">VELOCIDAD MEDIDA</div><div class="num"><span id="projRpm">—</span> <span class="unit">RPM</span></div></div>
+    <div class="card kpi"><div class="caption">ERROR</div><div class="num"><span id="projError">—</span> <span class="unit">RPM</span></div></div>
+    <div class="card kpi"><div class="caption">PWM</div><div class="num"><span id="projPwm">—</span> <span class="unit">%</span></div></div>
+  </div>
+  <div class="subtabs" role="tablist" aria-label="Secciones de ingeniería">
+    <button id="projectMonitorTab" class="subtab active" data-project-view="monitor" role="tab" aria-selected="true" aria-controls="projectMonitorPanel">01 · Monitoreo y PID</button>
+    <button id="projectMathTab" class="subtab" data-project-view="math" role="tab" aria-selected="false" aria-controls="projectMathPanel">02 · Ecuaciones y cálculos</button>
+    <button id="projectDataTab" class="subtab" data-project-view="data" role="tab" aria-selected="false" aria-controls="projectDataPanel">03 · Datos y diagnóstico</button>
+  </div>
+  <section class="workspace-panel" id="projectMonitorPanel" role="tabpanel" aria-labelledby="projectMonitorTab">
+    <div class="monitor-layout">
+      <div class="card chart-workspace">
+        <div class="card-heading"><h3>Respuesta temporal</h3><span class="subtle">Últimos 60 segundos</span></div>
+        <canvas id="projectChart" aria-label="Gráfica de RPM reales y referencia"></canvas>
+        <div class="legend">
+          <span><i class="swatch" style="background:#49abf5"></i>Referencia</span>
+          <span><i class="swatch" style="background:#38cf9b"></i>RPM real</span>
+          <span class="push-right" id="sampleCount">Sin lecturas</span>
+        </div>
+        <div class="panel-bottom-line"><span class="light-dot"></span>La curva se construye con mediciones USB, sin datos simulados.</div>
+      </div>
+      <div class="card controls-workspace">
+        <div class="card-heading"><h3>Configuración del controlador</h3><span class="mini-chip">En el ESP32</span></div>
+        <label for="projTarget">Referencia de velocidad (RPM)</label>
+        <div class="reference-control"><input id="projSlider" type="range" min="0" max="200" step="5" value="120"><input id="projTarget" type="number" min="0" max="200" step="1" value="120"></div>
+        <h4>Ganancias PID</h4>
+        <div class="three">
+          <div><label for="kp">Kp</label><input id="kp" type="number" min="0" max="10" step="0.01" value="0.8"></div>
+          <div><label for="ki">Ki</label><input id="ki" type="number" min="0" max="10" step="0.01" value="0.2"></div>
+          <div><label for="kd">Kd</label><input id="kd" type="number" min="0" max="10" step="0.01" value="0.05"></div>
+        </div>
+        <div class="actions"><button id="apply" class="blue">Aplicar referencia y PID</button></div>
+        <div class="actions"><button id="projRun" class="green" disabled>▶ Arrancar</button><button id="projStop" class="red" disabled>■ Detener</button></div>
+        <p id="projectNotice" class="hint-note">Conecta el ESP32.</p>
+        <p class="micro-note">Ganancias iniciales sujetas a identificación experimental.</p>
+      </div>
+    </div>
+  </section>
+  <section class="workspace-panel" id="projectMathPanel" role="tabpanel" aria-labelledby="projectMathTab" hidden>
+    <div class="lab-layout compact-lab">
+      <div class="card lab-input-card">
+        <div class="card-heading"><h3>Plantilla matemática</h3><span class="mini-chip">Sin LaTeX</span></div>
+        <div class="lab-select">
+          <label for="mathTemplate">Tema y ecuación</label>
+          <select id="mathTemplate">
+            <option value="first">Primer orden · G(s), ZOH, G(z)</option>
+            <option value="second">Función de transferencia de segundo orden</option>
+            <option value="motor">Modelo eléctrico y mecánico del motor DC</option>
+            <option value="jury">Estabilidad discreta · Jury</option>
+            <option value="pid">Algoritmo PID · un paso de cálculo</option>
+            <option value="speed">Velocidad de giro y velocidad lineal</option>
+            <option value="states">Espacio de estados · orden 2</option>
+          </select>
+        </div>
+        <div class="lab-fields" id="mathFields"></div>
+        <div class="math-actions"><button id="mathCompute" class="blue">Calcular</button><button id="mathCopy">Copiar</button><button id="mathReset">Restablecer</button></div>
+        <p class="micro-note">Los valores iniciales son ilustrativos. No representan mediciones del motor.</p>
+      </div>
+      <div class="card math-result">
+        <div class="card-heading"><h3>Desarrollo y resultados</h3><span id="mathState" class="subtle">Selecciona una plantilla</span></div>
+        <div id="mathOutput" class="math-output" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+  <section class="workspace-panel" id="projectDataPanel" role="tabpanel" aria-labelledby="projectDataTab" hidden>
+    <div class="data-layout">
+      <div class="card">
+        <div class="card-heading"><h3>Registro de ensayos</h3><span class="mini-chip">CSV local</span></div>
+        <p class="meta">Datos recibidos desde el ESP32 cada 200 ms.</p>
+        <div class="readout-pair"><span id="dataCounter">0 muestras</span><span id="dataDuration">0 s registrados</span></div>
+        <div class="actions"><button id="saveCsv" class="blue">Exportar CSV</button><button id="clearData">Limpiar</button></div>
+        <p class="micro-note">Referencia, RPM, error, PWM, marcha y falla; sin enviar datos a internet.</p>
+      </div>
+      <div class="card">
+        <div class="card-heading"><h3>Identificación de la planta</h3></div>
+        <div class="checkline">01 · Confirmar una marca por revolución.</div>
+        <div class="checkline">02 · Registrar un escalón de PWM fijo.</div>
+        <div class="checkline">03 · Estimar K = ΔRPM/Δduty y τ al 63,2 %.</div>
+        <div class="checkline">04 · Completar el modelo de primer orden.</div>
+        <p class="micro-note important">El firmware actual no ofrece ensayos a PWM fijo. Esta prueba requiere una modalidad separada.</p>
+      </div>
+      <div class="card log-workspace">
+        <div class="card-heading"><h3>Diagnóstico USB</h3><span class="mini-chip">115200 baudios</span></div>
+        <div class="log" id="log">Sin datos del ESP32.</div>
+      </div>
+    </div>
+  </section>
+  <div class="spec-strip">
+    <span>Ts <b>0,100 s</b></span><span>PWM <b>10 kHz</b></span><span>Resolución <b>8 bits</b></span><span>Marcas/vuelta <b>1</b></span><span>Motor <b>GPIO 25</b></span><span>Sensor <b>GPIO 27</b></span>
+  </div>
+</div>
+
+<div class="screen workspace plant-screen" id="plantScreen" hidden>
+  <div class="plantbar">
+    <div><h2>Faja transportadora</h2><p>Panel de operación · Un solo sentido de giro</p></div>
+    <span id="plantState" class="state">SIN CONEXIÓN</span>
+  </div>
+  <div class="plantmetrics">
+    <div class="card kpi plantmetric"><div class="caption">VELOCIDAD REAL</div><div class="num"><span id="plantRpm">—</span> <span class="unit">RPM</span></div></div>
+    <div class="card kpi plantmetric"><div class="caption">REFERENCIA</div><div class="num"><span id="plantRef">120</span> <span class="unit">RPM</span></div></div>
+    <div class="card kpi plantmetric"><div class="caption">SALIDA DE CONTROL</div><div class="num"><span id="plantPwm">—</span> <span class="unit">%</span></div></div>
+  </div>
+  <div class="plant-workspace">
+    <div class="plant-left">
+      <div class="card plant-visual">
+        <div class="card-heading"><h3>Estado de la faja</h3><span class="mini-chip">Avance ▶</span></div>
+        <div class="belt" id="belt"><div class="track"></div><div class="wheel left"></div><div class="wheel right"></div></div>
+        <div class="belttext" id="beltText">Faja detenida</div>
+      </div>
+      <div class="card plant-electric">
+        <div class="card-heading"><h3>Indicadores de operación</h3><span class="subtle">Datos y estimaciones diferenciados</span></div>
+        <div class="plant-facts">
+          <div class="fact"><span>Voltaje medio ideal</span><strong><span id="pVoltage">—</span> <small class="u">V</small></strong><small>5 V nominales × PWM</small></div>
+          <div class="fact"><span>Frecuencia PWM</span><strong>10 <small class="u">kHz</small></strong><small>Configuración ESP32</small></div>
+          <div class="fact"><span>Frecuencia mecánica</span><strong><span id="pRotHz">—</span> <small class="u">Hz</small></strong><small>RPM ÷ 60</small></div>
+          <div class="fact"><span>Tendencia</span><strong id="pTrend">—</strong><small>Acelera / estable / reduce</small></div>
+          <div class="fact"><span>Sentido</span><strong>Avance</strong><small>Único sentido XY-MOS</small></div>
+          <div class="fact" id="tempSimCard"><span>Temperatura simulada</span><strong><span id="pTempModel">25.0</span> <small class="u">°C</small></strong><small>Modelo software · no medida</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="plant-right">
+      <div class="card plant-control">
+        <div class="card-heading"><h3>Mando de velocidad</h3><span class="mini-chip">Control USB</span></div>
+        <label for="plantTarget">Referencia de velocidad</label>
+        <div class="reference-control"><input id="plantSlider" type="range" min="0" max="200" step="5" value="120"><input id="plantTarget" type="number" min="0" max="200" step="1" value="120"><span class="unit">RPM</span></div>
+        <div class="preset"><button data-preset="60">Lenta · 60</button><button data-preset="120">Media · 120</button><button data-preset="180">Rápida · 180</button></div>
+        <div class="bigbuttons"><button id="plantRun" class="green" disabled>▶ INICIAR</button><button id="plantStop" class="red" disabled>■ DETENER</button></div>
+        <div class="alarm" id="alarm">ESP32 desconectado.</div>
+      </div>
+      <div class="card plant-timer">
+        <div class="card-heading"><h3>Parada programada</h3><span class="mini-chip">Autónoma</span></div>
+        <div class="timer-inline">
+          <label for="timerSeconds">Tiempo (s)</label>
+          <input id="timerSeconds" type="number" min="1" max="3600" step="1" value="30">
+          <button id="timerStart" disabled>Iniciar temporizador</button>
+        </div>
+        <p class="micro-note" id="timerState">Requiere firmware v2 compatible.</p>
+      </div>
+      <p class="safety-note">STOP en pantalla no sustituye un corte eléctrico de emergencia.</p>
+    </div>
+  </div>
+  <canvas id="plantChart" hidden aria-hidden="true"></canvas>
+</div>
+
+<div class="screen workspace compare-screen" id="comparisonScreen" hidden>
+  <div class="sectiontitle compact-heading">
+    <div><h2>Comparación de resultados</h2><p>Referencia vs sensor TCRT5000 vs respuesta calculada del modelo</p></div>
+    <span class="infochip" id="compareSource">Pendiente de datos USB</span>
+  </div>
+  <div class="compare-kpis">
+    <div class="card kpi"><div class="caption">RPM MEDIDAS · SENSOR</div><div class="num"><span id="cmpRpmReal">—</span><span class="unit"> RPM</span></div></div>
+    <div class="card kpi"><div class="caption">RPM REFERENCIA · ORDEN</div><div class="num"><span id="cmpReference">—</span><span class="unit"> RPM</span></div></div>
+    <div class="card kpi"><div class="caption">RPM MODELO · CALCULADAS</div><div class="num"><span id="cmpRpmModel">—</span><span class="unit"> RPM</span></div></div>
+    <div class="card kpi"><div class="caption">ERROR DE SEGUIMIENTO</div><div class="num"><span id="cmpTrackPct">—</span><span class="unit"> %</span></div></div>
+    <div class="card kpi"><div class="caption">ERROR DEL MODELO</div><div class="num"><span id="cmpModelPct">—</span><span class="unit"> %</span></div></div>
+  </div>
+  <div class="card comparison-controls">
+    <div class="cmp-ident">
+      <strong>Modelo de primer orden (ZOH)</strong>
+      <span>Estimación teórica; necesita calibración para representar el motor.</span>
+    </div>
+    <div class="cmp-field"><label for="cmpK">K (RPM / duty)</label><input id="cmpK" type="number" value="150" step="any"></div>
+    <div class="cmp-field"><label for="cmpTau">τ (s)</label><input id="cmpTau" type="number" value="0.5" min="0.001" step="any"></div>
+    <button id="cmpApply" class="blue">Aplicar modelo</button>
+    <button id="cmpFromMath">Usar plantilla</button>
+    <button id="cmpClear">Reiniciar ensayo</button>
+  </div>
+  <div class="compare-layout">
+    <div class="card cmp-table-card">
+      <div class="card-heading">
+        <h3>Tabla de comparación · últimas lecturas</h3>
+        <span id="cmpCount" class="subtle">Sin muestras</span>
+      </div>
+      <div class="cmp-table-container">
+        <table class="cmp-table">
+          <thead><tr>
+            <th>t (s)</th><th>Ref.<br>RPM</th><th>Medidas<br>RPM</th><th>Modelo<br>RPM</th><th>PWM<br>%</th><th>Δ ref.<br>RPM</th><th>Error<br>ref. %</th><th>Δ modelo<br>RPM</th><th>Error<br>modelo %</th>
+          </tr></thead>
+          <tbody id="cmpRows"><tr><td colspan="9" class="cmp-empty">Esperando telemetría del ESP32 por USB.</td></tr></tbody>
+        </table>
+      </div>
+      <div class="cmp-table-footer"><span>Δ ref. = |referencia − RPM medidas|. Δ modelo = |RPM medidas − RPM calculadas|.</span><button id="cmpExport" class="blue">Exportar comparación CSV</button></div>
+    </div>
+    <div class="cmp-side">
+      <div class="card cmp-analysis">
+        <div class="card-heading"><h3>Análisis del ensayo</h3><span class="mini-chip">Tiempo real</span></div>
+        <div class="cmp-metric"><span>Error absoluto de seguimiento</span><strong id="cmpAbsTrack">— RPM</strong></div>
+        <div class="cmp-metric"><span>Error absoluto del modelo</span><strong id="cmpAbsModel">— RPM</strong></div>
+        <div class="cmp-metric"><span>MAE del modelo durante marcha</span><strong id="cmpMAE">— RPM</strong></div>
+        <div class="cmp-metric"><span>RMSE del modelo durante marcha</span><strong id="cmpRMSE">— RPM</strong></div>
+        <div class="cmp-metric"><span>Muestras durante marcha</span><strong id="cmpRunSamples">0</strong></div>
+        <div class="cmp-metric"><span>Estado</span><strong id="cmpState">Sin conexión</strong></div>
+      </div>
+      <div class="card cmp-legend-card">
+        <h3>Cómo interpretar</h3>
+        <p><b>Medido:</b> dato real del TCRT5000 (RPM).</p>
+        <p><b>Referencia:</b> consigna solicitada al PID, no una predicción.</p>
+        <p><b>Calculado:</b> respuesta del modelo G(s)=K/(τs+1) con PWM normalizado recibido como entrada.</p>
+        <p><b>% ref.:</b> 100 × Δ ref. / |referencia|.</p>
+        <p><b>% modelo:</b> 100 × Δ modelo / |RPM modelo|.</p>
+        <p class="cmp-warning">Si el denominador es cero, el porcentaje aparece como «—». La comparación del modelo es exploratoria mientras K y τ no se identifiquen experimentalmente.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="./config.js"></script><script src="./app.js" defer></script><script src="./extras.js" defer></script><script src="./layout.js" defer></script><script src="./comparison.js" defer></script></body></html>
