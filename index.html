@@ -224,64 +224,56 @@ button:active:not(:disabled){transform:translateY(1px)}
 </div>
 
 <div class="screen workspace compare-screen" id="comparisonScreen" hidden>
-  <div class="sectiontitle compact-heading">
-    <div><h2>Comparación de resultados</h2><p>Referencia vs sensor TCRT5000 vs respuesta calculada del modelo</p></div>
-    <span class="infochip" id="compareSource">Pendiente de datos USB</span>
+ <div class="card comparison-controls">
+   <div class="cmp-field cmp-selector"><label for="cmpView">Comparar datos</label>
+     <select id="cmpView">
+       <option value="reference">Referencia vs medición</option>
+       <option value="model">Modelo vs medición</option>
+       <option value="raw">Registro del ensayo</option>
+       <option value="sensor">Diagnóstico del sensor</option>
+     </select>
+   </div>
+   <div class="cmp-model-params" id="cmpModelParams">
+     <div class="cmp-field"><label for="cmpK">K</label><input id="cmpK" type="number" value="150" step="any"></div>
+     <div class="cmp-field"><label for="cmpTau">τ (s)</label><input id="cmpTau" type="number" value="0.5" min="0.001" step="any"></div>
+     <button id="cmpApply" class="blue">Aplicar modelo</button>
+   </div>
+   <div class="cmp-actionbar">
+     <button id="cmpClear">Reiniciar ensayo</button>
+     <div id="csvActionSlot"></div>
+   </div>
+ </div>
+ <p class="cmp-context" id="cmpContext">Comparación de la referencia solicitada con las RPM medidas.</p>
+ <div class="compare-layout">
+  <div class="card cmp-table-card">
+   <div class="card-heading"><h3 id="cmpTableTitle">Referencia vs RPM medidas</h3><span id="cmpCount" class="subtle">Sin muestras</span></div>
+   <div class="cmp-table-container"><table class="cmp-table" id="cmpTable">
+    <thead id="cmpTableHead"><tr><th>t (s)</th><th>Ref. (RPM)</th><th>Medida (RPM)</th><th>Error (RPM)</th><th>Error (%)</th></tr></thead>
+    <tbody id="cmpRows"><tr><td colspan="5" class="cmp-empty">Esperando datos reales del ESP32.</td></tr></tbody>
+   </table></div>
+   <div class="cmp-table-footer" id="cmpTableFooter">Los valores provienen de las muestras recibidas por USB.</div>
   </div>
-  <div class="compare-kpis">
-    <div class="card kpi"><div class="caption">RPM MEDIDAS · SENSOR</div><div class="num"><span id="cmpRpmReal">—</span><span class="unit"> RPM</span></div></div>
-    <div class="card kpi"><div class="caption">RPM REFERENCIA · ORDEN</div><div class="num"><span id="cmpReference">—</span><span class="unit"> RPM</span></div></div>
-    <div class="card kpi"><div class="caption">RPM MODELO · CALCULADAS</div><div class="num"><span id="cmpRpmModel">—</span><span class="unit"> RPM</span></div></div>
-    <div class="card kpi"><div class="caption">ERROR DE SEGUIMIENTO</div><div class="num"><span id="cmpTrackPct">—</span><span class="unit"> %</span></div></div>
-    <div class="card kpi"><div class="caption">ERROR DEL MODELO</div><div class="num"><span id="cmpModelPct">—</span><span class="unit"> %</span></div></div>
+  <div class="cmp-side">
+   <div class="card cmp-analysis">
+    <div class="card-heading"><h3>Resumen del ensayo</h3><span id="cmpSampleTag" class="mini-chip">0 muestras</span></div>
+    <div class="cmp-metric" id="cmpMetricTrack"><span>Error de seguimiento</span><strong id="cmpAbsTrack">— RPM</strong></div>
+    <div class="cmp-metric" id="cmpMetricModel"><span>Error del modelo</span><strong id="cmpAbsModel">— RPM</strong></div>
+    <div class="cmp-metric" id="cmpMetricMAE"><span>MAE del modelo</span><strong id="cmpMAE">— RPM</strong></div>
+    <div class="cmp-metric" id="cmpMetricRMSE"><span>RMSE del modelo</span><strong id="cmpRMSE">— RPM</strong></div>
+    <div class="cmp-metric"><span>Muestras durante marcha</span><strong id="cmpRunSamples">0</strong></div>
+    <div class="cmp-metric"><span>Estado del ensayo</span><strong id="cmpState">Sin datos</strong></div>
+    <div id="cmpCompactCount" class="cmp-smallline">0 muestras · 0 s</div>
+   </div>
+   <div class="card cmp-diagnostics">
+    <div class="card-heading"><h3>Diagnóstico</h3><span class="mini-chip">Ts 0,100 s · 1 marca/vuelta</span></div>
+    <div id="cmpDeviceLogSlot"></div>
+   </div>
   </div>
-  <div class="card comparison-controls">
-    <div class="cmp-ident">
-      <strong>Modelo de primer orden (ZOH)</strong>
-      <span>Estimación teórica; necesita calibración para representar el motor.</span>
-    </div>
-    <div class="cmp-field"><label for="cmpK">K (RPM / duty)</label><input id="cmpK" type="number" value="150" step="any"></div>
-    <div class="cmp-field"><label for="cmpTau">τ (s)</label><input id="cmpTau" type="number" value="0.5" min="0.001" step="any"></div>
-    <button id="cmpApply" class="blue">Aplicar modelo</button>
-    <button id="cmpFromMath">Usar plantilla</button>
-    <button id="cmpClear">Reiniciar ensayo</button>
-  </div>
-  <div class="compare-layout">
-    <div class="card cmp-table-card">
-      <div class="card-heading">
-        <h3>Tabla de comparación · últimas lecturas</h3>
-        <span id="cmpCount" class="subtle">Sin muestras</span>
-      </div>
-      <div class="cmp-table-container">
-        <table class="cmp-table">
-          <thead><tr>
-            <th>t (s)</th><th>Ref.<br>RPM</th><th>Medidas<br>RPM</th><th>Modelo<br>RPM</th><th>PWM<br>%</th><th>Δ ref.<br>RPM</th><th>Error<br>ref. %</th><th>Δ modelo<br>RPM</th><th>Error<br>modelo %</th>
-          </tr></thead>
-          <tbody id="cmpRows"><tr><td colspan="9" class="cmp-empty">Esperando telemetría del ESP32 por USB.</td></tr></tbody>
-        </table>
-      </div>
-      <div class="cmp-table-footer"><span>Δ ref. = |referencia − RPM medidas|. Δ modelo = |RPM medidas − RPM calculadas|.</span><button id="cmpExport" class="blue">Exportar comparación CSV</button></div>
-    </div>
-    <div class="cmp-side">
-      <div class="card cmp-analysis">
-        <div class="card-heading"><h3>Análisis del ensayo</h3><span class="mini-chip">Tiempo real</span></div>
-        <div class="cmp-metric"><span>Error absoluto de seguimiento</span><strong id="cmpAbsTrack">— RPM</strong></div>
-        <div class="cmp-metric"><span>Error absoluto del modelo</span><strong id="cmpAbsModel">— RPM</strong></div>
-        <div class="cmp-metric"><span>MAE del modelo durante marcha</span><strong id="cmpMAE">— RPM</strong></div>
-        <div class="cmp-metric"><span>RMSE del modelo durante marcha</span><strong id="cmpRMSE">— RPM</strong></div>
-        <div class="cmp-metric"><span>Muestras durante marcha</span><strong id="cmpRunSamples">0</strong></div>
-        <div class="cmp-metric"><span>Estado</span><strong id="cmpState">Sin conexión</strong></div>
-      </div>
-      <div class="card cmp-legend-card">
-        <h3>Cómo interpretar</h3>
-        <p><b>Medido:</b> dato real del TCRT5000 (RPM).</p>
-        <p><b>Referencia:</b> consigna solicitada al PID, no una predicción.</p>
-        <p><b>Calculado:</b> respuesta del modelo G(s)=K/(τs+1) con PWM normalizado recibido como entrada.</p>
-        <p><b>% ref.:</b> 100 × Δ ref. / |referencia|.</p>
-        <p><b>% modelo:</b> 100 × Δ modelo / |RPM modelo|.</p>
-        <p class="cmp-warning">Si el denominador es cero, el porcentaje aparece como «—». La comparación del modelo es exploratoria mientras K y τ no se identifiquen experimentalmente.</p>
-      </div>
-    </div>
-  </div>
+ </div>
+ <div id="compareCompatibility" hidden>
+  <span id="compareSource"></span><span id="cmpRpmReal"></span><span id="cmpReference"></span>
+  <span id="cmpRpmModel"></span><span id="cmpTrackPct"></span><span id="cmpModelPct"></span>
+  <button id="cmpFromMath" hidden></button><button id="cmpExport" hidden></button>
+ </div>
 </div>
-<link rel="stylesheet" href="./hmi.css"><link rel="stylesheet" href="./hmi-industrial.css"><script src="./config.js"></script><script src="./app.js" defer></script><script src="./extras.js" defer></script><script src="./layout.js" defer></script><script src="./comparison.js" defer></script><script src="./enhancements.js" defer></script></body></html>
+<link rel="stylesheet" href="./hmi.css"><link rel="stylesheet" href="./hmi-industrial.css"><script src="./config.js"></script><script src="./app.js" defer></script><script src="./extras.js" defer></script><script src="./layout.js" defer></script><script src="./comparison.js" defer></script><script src="./enhancements.js" defer></script><link rel="stylesheet" href="./results-compact.css"><script src="./results-compact.js" defer></script></body></html>

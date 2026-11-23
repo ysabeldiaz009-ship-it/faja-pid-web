@@ -196,8 +196,8 @@
  };
  by('saveCsv').addEventListener('click',()=>{
    if(!samples.length){log('No hay muestras para exportar.');return;}
-   const header='tiempo_ms,referencia_rpm,rpm_real,error_rpm,pwm_pct,marcha,falla,modo,kp,ki,kd,ensayo,diametro_rodillo_cm,meta_tiempo_ms,rpm_sin_filtrar,edad_pulso_ms,periodo_pulso_ms,pulsos';
-   const rows=samples.map(x=>[x.ms,x.ref,x.rpm,x.error,x.pwm,x.running,x.fault,x.mode||'',x.kp??'',x.ki??'',x.kd??'',x.testId||'',x.diameter??'',x.metaTimestamp??'',x.rawRpm??'',x.pulseAgeMs??'',x.pulsePeriodMs??'',x.pulseCount??''].join(','));
+   const header='tiempo_ms,referencia_rpm,rpm_real,error_rpm,pwm_pct,marcha,falla,modo,kp,ki,kd,ensayo,diametro_rodillo_cm,meta_tiempo_ms,rpm_sin_filtrar,edad_pulso_ms,periodo_pulso_ms,pulsos,modelo_aplicado,K_modelo_rpm_por_duty,tau_modelo_s,rpm_modelo,error_modelo_rpm,error_modelo_pct,Ts_controlador_s,pulsos_por_vuelta';
+   const rows=samples.map(x=>[x.ms,x.ref,x.rpm,x.error,x.pwm,x.running,x.fault,x.mode||'',x.kp??'',x.ki??'',x.kd??'',x.testId||'',x.diameter??'',x.metaTimestamp??'',x.rawRpm??'',x.pulseAgeMs??'',x.pulsePeriodMs??'',x.pulseCount??'',x.modelApplied?1:0,x.modelApplied?(x.modelK??''):'',x.modelApplied?(x.modelTau??''):'',x.modelApplied?(x.pred??''):'',x.modelApplied&&x.active?(x.absModel??''):'',x.modelApplied&&x.active&&Number.isFinite(x.errorModelPct)?x.errorModelPct:'',0.1,1].join(','));
    const blob=new Blob(['\ufeff'+[header,...rows].join('\r\n')],{type:'text/csv;charset=utf-8'});
    const url=URL.createObjectURL(blob),anchor=document.createElement('a');
    anchor.href=url;anchor.download='Faja_PID_datos_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.csv';document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);

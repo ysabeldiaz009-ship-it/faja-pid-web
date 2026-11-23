@@ -1,0 +1,87 @@
+/* Ingeniería y resultados: layout optimizado para una sola vista en escritorio */
+#serialDiagnostic,#serialDiagnostic[hidden],.spec-strip,.spec-strip[hidden]{display:none!important}
+body.unlocked .shell{padding-bottom:8px}
+body.unlocked .tabs{padding:6px 0 5px}
+body.unlocked .compact-heading{min-height:31px}
+body.unlocked .compact-heading h2{font-size:16px}
+body.unlocked .compact-heading p{font-size:10px}
+body.unlocked .compact-kpis{gap:6px}
+body.unlocked .compact-kpis>.card{min-height:54px;padding:7px 10px;border-radius:8px}
+body.unlocked .compact-kpis .kpi .num{font-size:24px;margin-top:3px}
+body.unlocked .compact-kpis .caption{font-size:9px}
+body.unlocked .subtabs{margin:0;gap:3px}
+body.unlocked .subtab{padding:7px 10px;font-size:11px}
+#projectState{display:none!important}
+#projectScreen:has(#projectDataPanel:not([hidden])) .compact-kpis{display:none!important}
+#projectScreen:has(#projectDataPanel:not([hidden])) .compact-heading{display:none!important}
+#projectScreen:has(#projectDataPanel:not([hidden])){gap:7px}
+#projectScreen:not(:has(#projectMonitorPanel:not([hidden]))) .compact-kpis{display:none!important}
+#projectDataPanel{display:flex;flex-direction:column;min-height:0;overflow:hidden!important}
+#projectDataPanel[hidden]{display:none!important}
+#projectDataPanel>.data-layout{display:none!important}
+#projectDataPanel>.inline-comparison{flex:1;display:flex!important;flex-direction:column;gap:7px;height:100%;min-height:0;margin:0;overflow:hidden}
+#projectDataPanel .compare-screen .sectiontitle,#projectDataPanel .compare-kpis{display:none!important}
+#projectDataPanel .comparison-controls{flex:0 0 auto;min-height:0;padding:9px 11px;gap:10px;flex-wrap:wrap;border-radius:9px}
+#projectDataPanel .cmp-selector{min-width:240px;flex:1}
+#projectDataPanel .cmp-selector label{white-space:nowrap;font-weight:650}
+#cmpView{background:#0c1726;color:#e3eff7;border:1px solid #3a5c75;border-radius:7px;padding:9px 10px;min-width:195px;width:100%;font:12px Inter,"Segoe UI",sans-serif}
+#cmpModelParams{display:flex;gap:7px;align-items:center;flex:0 0 auto}
+#cmpModelParams[hidden]{display:none!important}
+#projectDataPanel .cmp-model-params .cmp-field{gap:4px}
+#projectDataPanel .cmp-model-params input{width:70px!important;padding:8px 6px!important}
+#projectDataPanel .cmp-actionbar{display:flex;gap:7px;flex:0 0 auto}
+#projectDataPanel .cmp-actionbar button{padding:9px 11px;font-size:11px}
+#projectDataPanel .cmp-context{flex:0 0 auto;color:#95b5c9;font-size:10px;margin:0 3px;line-height:1.25}
+#projectDataPanel .compare-layout{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.95fr) minmax(265px,.72fr);gap:8px;overflow:hidden}
+#projectDataPanel .cmp-table-card{min-height:0;overflow:hidden;padding:11px}
+#projectDataPanel .cmp-table-card .card-heading{margin-bottom:7px}
+#projectDataPanel .cmp-table-container{flex:1;min-height:0;overflow:auto;max-height:none}
+#projectDataPanel .cmp-table{min-width:0;table-layout:auto;font-size:11px}
+#projectDataPanel .cmp-table th{padding:10px 7px;text-align:right;position:relative}
+#projectDataPanel .cmp-table td{padding:9px 7px;line-height:1.2}
+#projectDataPanel .cmp-table-footer{padding:7px 2px 0;font-size:10px;flex:0 0 auto}
+#projectDataPanel .cmp-side{display:flex;flex-direction:column;gap:8px;overflow:hidden;min-height:0}
+#projectDataPanel .cmp-analysis{flex:0 0 auto;padding:11px 12px}
+#projectDataPanel .cmp-analysis .card-heading{margin-bottom:5px}
+#projectDataPanel .cmp-metric{padding:7px 0;font-size:10px}
+#projectDataPanel .cmp-metric strong{font-size:12px}
+#projectDataPanel .cmp-smallline{font-size:10px;color:#9eb9cb;padding:9px 0 0}
+#projectDataPanel .cmp-diagnostics{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 12px;overflow:hidden}
+#projectDataPanel .cmp-diagnostics .mini-chip{font-size:9px}
+#projectDataPanel #cmpDeviceLogSlot{flex:1;min-height:0;display:flex;flex-direction:column}
+#projectDataPanel #engMeta{flex:0 0 auto;font-size:10px!important;margin:2px 0 7px!important;line-height:1.3}
+#projectDataPanel .compact-diagnostic-log{flex:1;display:flex;min-height:0;flex-direction:column;border:0;background:transparent;padding:0;overflow:hidden}
+#projectDataPanel .compact-diagnostic-log>.card-heading{display:none}
+#projectDataPanel .compact-diagnostic-log #log{overflow:auto;flex:1;min-height:0;max-height:none;font:10px/1.4 Consolas,monospace}
+.compact-measurement{font-size:10px;color:#acd2df;font-weight:500;margin-left:auto;white-space:nowrap}
+#projectMonitorPanel .eng-plots{padding:7px 10px;margin-top:7px}
+#projectMonitorPanel .eng-variable-grid{margin-bottom:6px;gap:6px}
+#projectMonitorPanel .eng-variable-grid label{margin:0;padding:6px 8px;font-size:10px}
+#projectMonitorPanel .eng-chart-type{font-size:10px}
+#projectMonitorPanel .chart-workspace{overflow:hidden}
+#projectMonitorPanel .controls-workspace{overflow:auto}
+#projectMonitorPanel .eng-mode{padding:9px;margin-top:8px}
+#projectMonitorPanel .eng-mode-title{margin-bottom:6px}
+#projectMonitorPanel .eng-mode-choice{margin-bottom:7px}
+#projectMonitorPanel .eng-mode-fields{gap:6px;margin-bottom:7px}
+@media(max-width:1040px),(max-height:660px){
+ body.unlocked{height:auto;min-height:100vh;overflow:auto}
+ body.unlocked .shell{height:auto;min-height:0;overflow:visible}
+ body.unlocked .screen.workspace{height:auto;min-height:0;overflow:visible}
+ #projectDataPanel{height:auto;overflow:visible!important}
+ #projectDataPanel>.inline-comparison{height:auto;overflow:visible}
+ #projectDataPanel .compare-layout{grid-template-columns:minmax(0,1fr)}
+ #projectDataPanel .cmp-table-container{max-height:380px;overflow:auto}
+ #projectDataPanel .cmp-side{overflow:visible}
+ #projectDataPanel .cmp-diagnostics{min-height:130px}
+ #projectDataPanel .compact-diagnostic-log #log{max-height:150px}
+}
+@media(max-width:640px){
+ #projectDataPanel .comparison-controls{display:flex;flex-direction:column;align-items:stretch}
+ #projectDataPanel .cmp-selector{min-width:0}
+ #cmpView{min-width:0}
+ #projectDataPanel .cmp-model-params,#projectDataPanel .cmp-actionbar{width:100%;justify-content:space-between}
+ #projectDataPanel .cmp-table{min-width:480px}
+ #projectDataPanel .cmp-side{display:flex;flex-direction:column}
+ .compact-measurement{margin-left:0}
+}
