@@ -206,7 +206,7 @@ $('hmiStart').addEventListener('click',async()=>{
    if(last.run&&confirmedMode==='PWM')return notice('Detén el ensayo PWM antes de operar la HMI.');
    if(!modeReady())return notice('Modo o PWM sin confirmar. Espera la confirmación ESP32.');
    if(requestedMode==='PID')await apply();
-   await send('RUN,1');notice('Inicio solicitado en '+requestedMode+'; esperando respuesta de la planta.');
+   await send(window.fajaStartCommand?.()||'RUN,1');notice('Inicio solicitado en '+requestedMode+'; esperando respuesta de la planta.');
  }catch(e){notice('Error de inicio: '+e.message)}
 });
 $('hmiStop').addEventListener('click',()=>{if(online)send('STOP').then(()=>notice('Parada solicitada.')).catch(e=>notice(e.message));else notice('Sin USB: usa el corte físico del motor.')});

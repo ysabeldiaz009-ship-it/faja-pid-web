@@ -1,0 +1,18 @@
+/* Cronómetro por ensayo en pantalla Ingeniería. */
+.trial-timer-panel{border:1px solid #315979;border-radius:10px;background:#0d2436;padding:12px 14px;margin:10px 0 12px}
+.trial-timer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.trial-timer-head b{font-size:12px;color:#d7edff}
+.trial-timer-head small{font-size:10px;color:#97b8d0}
+.trial-timer-main{display:flex;align-items:center;gap:16px;margin:9px 0}
+.trial-timer-digits{font-variant-numeric:tabular-nums;font-family:Consolas,'Segoe UI',monospace;font-size:35px;letter-spacing:.01em;font-weight:750;color:#dff7ff;min-width:151px}
+.trial-timer-panel.is-running .trial-timer-digits{color:#6cf2cb}
+.trial-timer-info{display:flex;flex-direction:column;gap:4px;min-width:0;font-size:10px;color:#a9c7dc;line-height:1.4}
+.trial-timer-info strong{color:#94ebc5;font-size:11px}
+.trial-timer-settings{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid #2f4c65;padding-top:9px}
+.trial-timer-check{display:inline-flex;align-items:center;gap:7px;margin:0;font-size:11px;cursor:pointer}
+.trial-timer-check input{accent-color:#35c7a1}
+.trial-timer-length{display:flex;align-items:center;gap:8px;margin:0;font-size:11px}
+.trial-timer-length input{font-size:13px!important;padding:7px!important;width:78px!important;max-width:78px!important}
+.trial-timer-foot{font-size:10px;color:#91b1c8;margin-top:9px;line-height:1.4}
+.trial-clock-badge{padding:5px 9px;border:1px solid #336b80;border-radius:7px;background:#112d3e;color:#c7ebfb;font-family:Consolas,monospace;font-size:12px;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:720px){.trial-timer-digits{font-size:29px;min-width:120px}.trial-timer-main{gap:9px}.trial-clock-badge{font-size:10px}}
