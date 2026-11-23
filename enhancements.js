@@ -30,7 +30,7 @@ hmi.innerHTML=`
      <div class="hmi-vital"><span>VOLTAJE MEDIO IDEAL</span><strong><span id="hmiVoltage">—</span><small>V</small></strong><em>Estimación por PWM; no medido</em></div>
      <div class="hmi-vital"><span>TEMPERATURA</span><strong><span id="hmiTemperature">25,0</span><small>°C</small></strong><em>Simulación software; no medida</em></div>
    </div>
-   <p class="hmi-footnote">Sin banda física, la velocidad en m/s representa una equivalencia calculada. La animación sigue las RPM medidas; no sustituye una medición lineal de la banda.</p>
+
  </div>
  <aside class="hmi-ops">
    <div class="hmi-console-header">ESTACIÓN DE MANDO <strong>CP-01</strong></div><div class="hmi-panel-label">SEÑALIZACIÓN DE ESTADO</div><div class="hmi-annunciators"><span><i id="hmiPilotReady" class="pilot-light"></i> LISTO</span><span><i id="hmiPilotRunning" class="pilot-light"></i> MARCHA</span><span><i id="hmiPilotFault" class="pilot-light"></i> FALLA</span></div><div class="hmi-panel-label">MANDO DE OPERACIÓN</div>
@@ -48,7 +48,7 @@ hmi.innerHTML=`
    </div>
    <div class="hmi-setpoint">Consigna equivalente: <b id="hmiTarget">—</b> <span>m/s</span></div>
    <div id="hmiMessage" class="hmi-message">Esperando comunicación del ESP32.</div>
-   <div class="hmi-safety">La parada en pantalla depende del software y del USB. Instalar un corte de alimentación físico independiente para una parada de emergencia real.</div>
+
  </aside>
 </div>`;
 plant.appendChild(hmi);
