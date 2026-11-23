@@ -105,6 +105,6 @@ resetAction.addEventListener('click',()=>{
  update();
 });
 const priorReceive=receive;
-receive=function(line){priorReceive(line);if(line.startsWith('DATA,'))update()};
+receive=function(line){priorReceive(line);if(line.startsWith('DATA,'))window.renderCompactResults?.()};
 update();
 })();
