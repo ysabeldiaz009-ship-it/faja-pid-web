@@ -69,7 +69,7 @@ button:active:not(:disabled){transform:translateY(1px)}
 <div class="connection"><span class="pill"><span id="connDot" class="dot"></span><span id="connStatus">SIN CONEXIÓN</span></span><button id="connect" class="blue">Conectar ESP32</button><span id="deviceHint" class="device-hint">USB: pendiente</span></div>
 </div></header>
 <div id="serialDiagnostic" class="serial-diagnostic" role="status" aria-live="polite">Conecta el ESP32 desde Chrome o Edge. USB sin Wi-Fi.</div>
-<div class="shell"><nav class="tabs" aria-label="Seleccionar vista"><button id="projectTab" class="tab active" aria-pressed="true">PROYECTO · Ingeniería</button><button id="plantTab" class="tab" aria-pressed="false">PLANTA · Operación</button><button id="comparisonTab" class="tab" aria-pressed="false">COMPARACIÓN · Resultados</button></nav>
+<div class="shell"><nav class="tabs" aria-label="Seleccionar vista"><button id="projectTab" class="tab active" aria-pressed="true">PROYECTO · Ingeniería</button><button id="plantTab" class="tab" aria-pressed="false">PLANTA · Operación</button><button id="comparisonTab" class="tab" aria-pressed="false" hidden>COMPARACIÓN · Resultados</button></nav>
 
 <div class="screen workspace project-screen" id="projectScreen">
   <div class="sectiontitle compact-heading">
@@ -85,7 +85,7 @@ button:active:not(:disabled){transform:translateY(1px)}
   <div class="subtabs" role="tablist" aria-label="Secciones de ingeniería">
     <button id="projectMonitorTab" class="subtab active" data-project-view="monitor" role="tab" aria-selected="true" aria-controls="projectMonitorPanel">01 · Monitoreo y PID</button>
     <button id="projectMathTab" class="subtab" data-project-view="math" role="tab" aria-selected="false" aria-controls="projectMathPanel">02 · Ecuaciones y cálculos</button>
-    <button id="projectDataTab" class="subtab" data-project-view="data" role="tab" aria-selected="false" aria-controls="projectDataPanel">03 · Datos y diagnóstico</button>
+    <button id="projectDataTab" class="subtab" data-project-view="data" role="tab" aria-selected="false" aria-controls="projectDataPanel">03 · Resultados, datos y comparación</button>
   </div>
   <section class="workspace-panel" id="projectMonitorPanel" role="tabpanel" aria-labelledby="projectMonitorTab">
     <div class="monitor-layout">
@@ -284,4 +284,4 @@ button:active:not(:disabled){transform:translateY(1px)}
     </div>
   </div>
 </div>
-<script src="./config.js"></script><script src="./app.js" defer></script><script src="./extras.js" defer></script><script src="./layout.js" defer></script><script src="./comparison.js" defer></script></body></html>
+<link rel="stylesheet" href="./hmi.css"><script src="./config.js"></script><script src="./app.js" defer></script><script src="./extras.js" defer></script><script src="./layout.js" defer></script><script src="./comparison.js" defer></script><script src="./enhancements.js" defer></script></body></html>

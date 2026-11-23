@@ -7,8 +7,7 @@ function log(message){el('log').textContent='['+now()+'] '+message+'\n'+el('log'
 function tab(mode){
  for(const [view,screenId,tabId] of [
   ['project','projectScreen','projectTab'],
-  ['plant','plantScreen','plantTab'],
-  ['comparison','comparisonScreen','comparisonTab']
+  ['plant','plantScreen','plantTab']
  ]){
   const active=(mode===view);
   el(screenId).hidden=!active;
@@ -17,7 +16,7 @@ function tab(mode){
  }
  if(mode==='project')drawAll();
 }
-el('projectTab').onclick=()=>tab('project');el('plantTab').onclick=()=>tab('plant');el('comparisonTab').onclick=()=>tab('comparison');
+el('projectTab').onclick=()=>tab('project');el('plantTab').onclick=()=>tab('plant');
 function setTarget(value){let v=Number(value);if(!Number.isFinite(v))v=0;v=Math.min(200,Math.max(0,v));for(const id of ['projSlider','projTarget','plantSlider','plantTarget'])el(id).value=v;el('projSet').textContent=v;el('plantRef').textContent=v;last.set=v}
 for(const id of ['projSlider','projTarget','plantSlider','plantTarget'])el(id).oninput=()=>setTarget(el(id).value);
 function readConfig(){const v=[Number(el('projTarget').value),Number(el('kp').value),Number(el('ki').value),Number(el('kd').value)];if(v.some(x=>!Number.isFinite(x))||v[0]<0||v[0]>200||v.slice(1).some(x=>x<0||x>10))throw Error('Referencia 0–200 RPM; Kp/Ki/Kd 0–10');return v}
@@ -46,7 +45,7 @@ function receive(line){
   if(moving){belt.style.setProperty('--spin',Math.max(.18,Math.min(3,60/rpm))+'s');belt.style.setProperty('--track',Math.max(.2,Math.min(3,60/rpm))+'s')}
   el('beltText').textContent=moving?'Velocidad: '+rpm.toFixed(1)+' RPM':'Faja detenida';
   records.push({time:ms/1000,set,rpm});if(records.length>450)records.shift();el('sampleCount').textContent=records.length+' lecturas';drawAll();
- }else if(['READY','ACK','ERR','FAULT'].includes(a[0]))log(line);
+ }else if(['READY','ACK','ERR','FAULT','CAPS','VER'].includes(a[0])&&line!=='ACK,PING')log(line);
 }
 // Web Serial puede entregar un stream nuevo después de FramingError/ParityError/BreakError.
 // No desconectar ni liberar el puerto ante errores de lectura no fatales.
@@ -156,5 +155,6 @@ for(let n=0;n<=4;n++){let y=T+(B-T)*n/4;ctx.strokeStyle='#294055';ctx.lineWidth=
 if(!records.length){ctx.textAlign='center';ctx.fillStyle='#819cb4';ctx.font='14px Segoe UI';ctx.fillText('Sin lecturas del ESP32',w/2,h/2);return}
 const max=records[records.length-1].time,min=Math.max(0,max-60);for(const [key,color] of [['set','#49abf5'],['rpm','#38cf9b']]){ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2;let first=true;for(const r of records){if(r.time<min)continue;const x=L+((r.time-min)/60)*(R-L),y=B-Math.max(0,Math.min(200,r[key]))/200*(B-T);if(first){ctx.moveTo(x,y);first=false}else ctx.lineTo(x,y)}ctx.stroke()}}
 function drawAll(){draw(el('projectChart'));draw(el('plantChart'))}window.addEventListener('resize',drawAll);
+setInterval(()=>{if(online)send('PING').catch(e=>log('PING: '+e.message))},1200);
 setInterval(()=>{if(online&&lastDataTime&&Date.now()-lastDataTime>1700){el('alarm').className='alarm warn';el('alarm').textContent='Sin datos recientes. Revisa el cable USB.';el('belt').classList.remove('moving');el('beltText').textContent='Faja detenida';el('plantState').textContent='SIN DATOS';el('plantState').className='state fault'}},700);
 drawAll();

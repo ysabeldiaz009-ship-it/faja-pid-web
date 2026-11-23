@@ -157,6 +157,7 @@
    by('pTempModel').textContent=model.value.toFixed(1);
  }
  let samples=[],previousTrend=null;
+  window.fajaSamples=samples;
  let timerAvailable=false;
  const origReceive=receive;
  receive=function(line){
@@ -177,7 +178,8 @@
    if(v.some(y=>!Number.isFinite(y)))return;
    const [ms,ref,rpm,error,pwm,running,fault]=v;
    updateTemperatureModel(ms,pwm,running,fault);
-   samples.push({ms,ref,rpm,error,pwm,running,fault});
+   const meta=window.fajaTestMetadata?window.fajaTestMetadata():{};
+    samples.push({ms,ref,rpm,error,pwm,running,fault,...meta});
    if(samples.length>30000)samples.shift();
    by('dataCounter').textContent=samples.length+' muestras';
    by('dataDuration').textContent=(samples.length>1?(ms-samples[0].ms)/1000:0).toFixed(1)+' s registrados';
@@ -194,8 +196,8 @@
  };
  by('saveCsv').addEventListener('click',()=>{
    if(!samples.length){log('No hay muestras para exportar.');return;}
-   const header='tiempo_ms,referencia_rpm,rpm_real,error_rpm,pwm_pct,marcha,falla';
-   const rows=samples.map(x=>[x.ms,x.ref,x.rpm,x.error,x.pwm,x.running,x.fault].join(','));
+   const header='tiempo_ms,referencia_rpm,rpm_real,error_rpm,pwm_pct,marcha,falla,modo,kp,ki,kd,ensayo,diametro_rodillo_cm,meta_tiempo_ms,rpm_sin_filtrar,edad_pulso_ms,periodo_pulso_ms,pulsos';
+   const rows=samples.map(x=>[x.ms,x.ref,x.rpm,x.error,x.pwm,x.running,x.fault,x.mode||'',x.kp??'',x.ki??'',x.kd??'',x.testId||'',x.diameter??'',x.metaTimestamp??'',x.rawRpm??'',x.pulseAgeMs??'',x.pulsePeriodMs??'',x.pulseCount??''].join(','));
    const blob=new Blob(['\ufeff'+[header,...rows].join('\r\n')],{type:'text/csv;charset=utf-8'});
    const url=URL.createObjectURL(blob),anchor=document.createElement('a');
    anchor.href=url;anchor.download='Faja_PID_datos_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.csv';document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -203,7 +205,7 @@
  });
  by('clearData').addEventListener('click',()=>{
    if(last.run){log('Detén el motor antes de limpiar registros.');return;}
-   samples=[];records=[];previousTrend=null;by('dataCounter').textContent='0 muestras';by('dataDuration').textContent='0 s registrados';drawAll();log('Registro reiniciado.');
+   samples=[];window.fajaSamples=samples;records=[];previousTrend=null;by('dataCounter').textContent='0 muestras';by('dataDuration').textContent='0 s registrados';drawAll();log('Registro reiniciado.');
  });
  by('timerStart').title='Disponible solamente con firmware FAJA_PID_V2.';
  by('timerStart').addEventListener('click',async()=>{

@@ -111,7 +111,9 @@
   const absModel=Math.abs(rpm-model.pred);
   const errorRefPct=pct(absRef,ref);
   const errorModelPct=pct(absModel,model.pred);
-  const row={time:ms/1000,ref,rpm,pred:model.pred,pwm,running,fault,active,absRef,absModel,errorRefPct,errorModelPct};
+  const shared=window.fajaSamples&&window.fajaSamples[window.fajaSamples.length-1];
+   const row=shared&&shared.ms===ms?shared:{};
+   Object.assign(row,{time:ms/1000,ref,rpm,pred:model.pred,pwm,running,fault,active,absRef,absModel,errorRefPct,errorModelPct});
   history.push(row);
   if(history.length>10000)history.shift();
   if(active){runningCount++;absSum+=absModel;absSqSum+=absModel*absModel;}

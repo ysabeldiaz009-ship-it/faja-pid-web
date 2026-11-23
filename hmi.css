@@ -1,0 +1,69 @@
+/* Faja PID 2.4 - HMI de operador + laboratorio integrado */
+#comparisonTab[hidden]{display:none!important}
+#plantLegacy{display:none!important}
+#plantScreen{overflow:auto!important;display:block;min-height:0}
+#plantScreen[hidden]{display:none!important}
+.inline-comparison{display:flex;flex-direction:column;gap:12px;margin-top:12px;min-height:0}
+.inline-comparison .compare-layout{min-height:360px}
+#projectDataPanel{overflow:auto!important}
+#projectDataPanel>.data-layout{min-height:210px;height:auto}
+#projectDataPanel .cmp-table-container{min-height:220px;max-height:420px}
+.hmi-board{display:flex;flex-direction:column;gap:13px;min-width:0;padding:3px}
+.hmi-head{background:#132539;border:1px solid #314b5d;padding:17px 20px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.hmi-head h2{font-size:20px;line-height:1.2;letter-spacing:.01em;margin:3px 0 0}
+.hmi-overline,.hmi-panel-label{font-size:10px;font-weight:800;letter-spacing:.14em;color:#91b7cc}
+.hmi-state{font-size:12px;letter-spacing:.07em;border-radius:8px;background:#31465a;padding:10px 15px;color:#d5e5ee;white-space:nowrap}
+.hmi-state.working{background:#175845;color:#c5ffde}
+.hmi-state.alarmed{background:#8d303d;color:#fff0e8}
+.hmi-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.72fr);gap:13px;min-height:0}
+.hmi-process,.hmi-ops{border:1px solid #30495d;border-radius:12px;background:#112134;padding:19px;min-width:0}
+.hmi-process{display:flex;flex-direction:column;gap:19px}
+.hmi-process-head{display:flex;justify-content:space-between;align-items:center;color:#c5d9e7;font-size:13px}
+.hmi-process-head span{background:#1d3346;padding:7px 10px;border-radius:7px;font-size:10px;color:#aac0d0;letter-spacing:.07em}
+.hmi-belt{height:160px;position:relative;margin:4px 20px 12px;--hmi-spin:1s}
+.hmi-belt-track{position:absolute;left:4%;top:28%;width:92%;height:60px;border:7px solid #7896a9;border-radius:36px;background:repeating-linear-gradient(110deg,#35576b 0px,#35576b 21px,#496b80 22px,#496b80 43px);box-shadow:inset 0 6px 15px #11202d,0 7px 8px #091723;animation:hmi-track var(--hmi-spin) linear infinite;animation-play-state:paused}
+.hmi-belt.moving .hmi-belt-track{animation-play-state:running}
+@keyframes hmi-track{from{background-position:0 0}to{background-position:88px 0}}
+.hmi-roller{position:absolute;top:33%;width:44px;height:44px;border-radius:50%;border:7px solid #a8bdc9;background:radial-gradient(circle,#8aa9b9 0 6px,#1e3a4d 7px);box-shadow:0 2px 6px #091722}
+.hmi-roller.l{left:5%}.hmi-roller.r{right:5%}
+.hmi-support{position:absolute;top:77%;width:13px;height:40px;border:2px solid #58788b;background:#263e50}
+.hmi-support.left{left:14%}.hmi-support.right{right:14%}
+.hmi-vitals{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:10px}
+.hmi-vital{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;padding:13px;background:#192d40;border:1px solid #2b4760;border-radius:10px;min-width:0}
+.hmi-vital.primary{background:#173748;border-color:#2f6c7c}
+.hmi-vital>span{color:#aac4d8;font-size:9px;font-weight:800;letter-spacing:.05em}
+.hmi-vital>strong{font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums;letter-spacing:-.04em;color:#f2faff;white-space:nowrap}
+.hmi-vital.primary>strong{font-size:37px;color:#b1f4e2}
+.hmi-vital strong small{font-size:13px;margin-left:4px;letter-spacing:0;color:#abcad4}
+.hmi-vital em{color:#8caac1;font-size:10px;font-style:normal;line-height:1.3}
+.hmi-footnote{font-size:10px;color:#8ba9c0;line-height:1.5}
+.hmi-ops{display:flex;flex-direction:column;gap:13px}
+.hmi-commands{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hmi-btn{border:1px solid #56788e;min-height:85px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;background:#1c3549;color:#eaf5fa;font-size:26px;font-weight:800;cursor:pointer}
+.hmi-btn span{font-size:12px}
+.hmi-btn.start{background:#164f3a;border-color:#31865e}
+.hmi-btn.stop{background:#3a4353;border-color:#758494}
+.hmi-btn.emergency{grid-column:1/-1;min-height:83px;background:#933741;border-color:#f0777e}
+.hmi-btn:disabled{opacity:.45;cursor:not-allowed}
+.hmi-reset{background:#324e63;border:1px solid #64869a;color:#fff;padding:12px;border-radius:8px}
+.hmi-reset[hidden]{display:none!important}
+.hmi-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.hmi-presets button{min-width:0;padding:15px 3px;background:#203a50;border:1px solid #557389;color:#dcebf3;border-radius:8px;font-size:11px;font-weight:800}
+.hmi-presets button.selected{background:#23675c;border-color:#70dec0;color:#eafffa}
+.hmi-setpoint{font-size:12px;color:#a7c3d9;border-bottom:1px solid #2d465a;padding-bottom:12px}
+.hmi-setpoint b{color:#e4ffff;margin-left:5px;font-size:20px}
+.hmi-message{padding:10px;background:#183147;border-radius:7px;line-height:1.4;font-size:11px;color:#c1dce8}
+.hmi-safety{font-size:10px;color:#e5c791;line-height:1.5}
+.eng-mode,.eng-plots{border:1px solid #334c5b;background:#17283a;padding:11px;border-radius:9px;margin-top:12px}
+.eng-mode-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;align-items:center}
+.eng-mode-title b{font-size:12px}.eng-mode-title small{font-size:9px;color:#8daabd}
+.eng-mode-choice,.eng-mode-fields,.eng-variable-grid{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.eng-mode-choice label,.eng-variable-grid label{font-size:11px;display:flex;align-items:center;gap:6px;background:#1e364a;padding:8px;border-radius:6px}
+.eng-mode-fields label{display:flex;flex-direction:column;gap:3px;font-size:10px;flex:1;min-width:90px;color:#a9c7da}
+.eng-mode-fields input{max-width:160px!important;width:100%!important}
+.eng-mode-fields button{font-size:10px;padding:8px;background:#29485e;border:1px solid #538aa2;color:#f0ffff;border-radius:7px}
+.eng-mode-status{color:#a7c2d8;font-size:10px;line-height:1.5}
+.eng-chart-type{font-size:10px;color:#9ebed3}
+.eng-chart-type select{padding:5px;margin-left:7px;background:#172e44;color:#f4f8fc;border:1px solid #385571;border-radius:6px}
+@media(max-width:1000px){.hmi-grid{grid-template-columns:1fr}.hmi-vitals{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.hmi-head{align-items:flex-start;flex-direction:column}.hmi-vitals{grid-template-columns:1fr}.hmi-vital.primary>strong{font-size:32px}.hmi-belt{margin-left:0;margin-right:0;height:120px}.hmi-roller{width:34px;height:34px}.hmi-ops,.hmi-process{padding:12px}.hmi-btn span{font-size:10px}}
