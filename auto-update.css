@@ -1,0 +1,6 @@
+.faja-update-notice[hidden]{display:none!important}
+.faja-update-notice{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px clamp(14px,3vw,52px);background:#12283b;border-bottom:1px solid #42617b;color:#d3e6f3;font-size:12px}
+.faja-update-mark{font-weight:700}
+.faja-update-notice button{padding:6px 11px;min-height:28px;font-size:12px;border:1px solid #5b93b7;background:#1b5575;color:#effbff;border-radius:7px;cursor:pointer}
+.faja-update-notice button:disabled{opacity:.55;cursor:not-allowed}
+.faja-update-notice small{font-size:11px;color:#aac5d8}

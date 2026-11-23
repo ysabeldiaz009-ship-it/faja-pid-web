@@ -284,50 +284,120 @@ receive=function(line){
 };
 function mappedPlot(canvas){
  const rect=canvas.getBoundingClientRect();if(rect.width<10)return;
- const k=window.fajaPlot, rows=window.fajaSamples||[];
- const d=window.devicePixelRatio||1,w=rect.width,h=Math.max(190,Math.round(rect.height));canvas.width=Math.round(w*d);canvas.height=Math.round(h*d);
+ const k=window.fajaPlot,rows=window.fajaSamples||[];
+ const d=window.devicePixelRatio||1,w=rect.width,h=Math.max(190,Math.round(rect.height));
+ canvas.width=Math.round(w*d);canvas.height=Math.round(h*d);
  const ctx=canvas.getContext('2d');ctx.scale(d,d);ctx.clearRect(0,0,w,h);
- const L=48,R=w-16,T=20,B=h-25,dt=rows.length?(rows[rows.length-1].ms-rows[0].ms)/1000:0,t0=Math.max(0,dt-60),range=dt>60?60:Math.max(10,dt);
- if(!rows.length){ctx.fillStyle='#9db5c9';ctx.font='13px sans-serif';ctx.fillText('Sin muestras del ESP32',L+20,70);return}
- // Eje vertical automático para no recortar sobreimpulsos superiores a 200 RPM.
- // Se calcula con las lecturas visibles (últimos 60 s); 200 RPM es solo el mínimo de escala.
+ const bothSecondary=k.pwm&&k.err;
+ const L=62,R=w-(bothSecondary?58:20),T=23,B=h-40;
+ if(!rows.length){
+  ctx.fillStyle='#a7c7db';ctx.font='12px Segoe UI,sans-serif';
+  ctx.fillText('Sin lecturas del ESP32',L+12,72);return;
+ }
+ const firstMs=Number(rows[0].ms),lastMs=Number(rows[rows.length-1].ms);
+ const dt=Math.max(0,(lastMs-firstMs)/1000),t0=Math.max(0,dt-60),range=dt>60?60:Math.max(10,dt);
  const peak=rows.reduce((highest,p)=>{
-   const t=(p.ms-rows[0].ms)/1000;
-   if(t<t0)return highest;
-   const ref=k.set?Number(p.ref):0,actual=k.rpm?Number(p.rpm):0;
-   return Math.max(highest,Number.isFinite(ref)?ref:0,Number.isFinite(actual)?actual:0);
+  const t=(Number(p.ms)-firstMs)/1000;
+  if(t<t0)return highest;
+  const ref=k.set?Number(p.ref):0,actual=k.rpm?Number(p.rpm):0;
+  return Math.max(highest,Number.isFinite(ref)?ref:0,Number.isFinite(actual)?actual:0);
  },0);
+ // La escala de la GRÁFICA no limita los valores del CSV.
  const rpmAxisMax=Math.max(200,Math.ceil(peak*1.1/50)*50);
  window.fajaGraphAxisMax=rpmAxisMax;
  const topKeys=[['set','ref','#49abf5',rpmAxisMax],['rpm','rpm','#38cf9b',rpmAxisMax]].filter(a=>k[a[0]]);
  const lowerKeys=[['pwm','pwm','#f2b467',100],['err','error','#b69bfc',100]].filter(a=>k[a[0]]);
- const split=topKeys.length&&lowerKeys.length;
- function chart(group,ymin,ymax,keys,label){
-  const HH=ymax-ymin, y=val=>ymax-(val/HH)*(ymax-ymin);
-  ctx.strokeStyle='#294056';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,ymin);ctx.lineTo(L,ymax);ctx.lineTo(R,ymax);ctx.stroke();
-  ctx.fillStyle='#92adc3';ctx.font='10px sans-serif';ctx.fillText(label,L+5,ymin+11);
-  for(const [id,field,color,limit] of keys){
-   ctx.beginPath();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;let started=false,lastX=0,lastY=0;
-   for(const point of rows){const t=(point.ms-rows[0].ms)/1000;if(t<t0)continue;const px=L+(t-t0)/range*(R-L);
-    const v=Number(point[field]);if(!Number.isFinite(v))continue;
-    const ratio=id==='err'?(Math.max(-100,Math.min(100,v))+100)/200:Math.max(0,Math.min(limit,v))/limit;
-    const py=ymax-ratio*HH;
-    if(k.type==='points'){ctx.moveTo(px+2,py);ctx.arc(px,py,2,0,Math.PI*2);}
-    else if(!started){ctx.moveTo(px,py)}
-    else if(k.type==='step'){ctx.lineTo(px,lastY);ctx.lineTo(px,py)}
-    else ctx.lineTo(px,py);
-    started=true;lastX=px;lastY=py;
-   }ctx.stroke();
+ const split=topKeys.length>0&&lowerKeys.length>0;
+ const P=R-L;
+ const px=t=>L+(t-t0)/range*P;
+ const mark=(v)=>Number.isInteger(v)?String(v):v.toFixed(1);
+ // Líneas verticales compartidas por los paneles y marcas del eje X.
+ const targetTick=range/6;
+ const xStep=[1,2,5,10,15,20,30].find(v=>v>=targetTick)||30;
+ ctx.font='11px Segoe UI,sans-serif';
+ ctx.lineWidth=1;ctx.textAlign='center';ctx.textBaseline='middle';
+ const tFirst=Math.ceil((t0-1e-7)/xStep)*xStep;
+ for(let t=tFirst;t<=t0+range+1e-7;t+=xStep){
+  const x=px(t);
+  ctx.strokeStyle='rgba(106,153,185,0.17)';ctx.beginPath();
+  ctx.moveTo(x,T);ctx.lineTo(x,B);ctx.stroke();
+  ctx.fillStyle='#a9c6d9';ctx.fillText(mark(t)+' s',x,B+15);
+ }
+ ctx.fillStyle='#c3d9e8';ctx.font='11px Segoe UI,sans-serif';
+ ctx.fillText('Tiempo desde inicio (s)',(L+R)/2,h-8);
+ const drawPane=(keys,top,bottom,type)=>{
+  const H=bottom-top;
+  const axisMax=type==='rpm'?rpmAxisMax:100;
+  const axisMin=type==='error'?-100:0;
+  const yVal=(value,min,max)=>bottom-(value-min)/(max-min)*H;
+  const steps=type==='rpm'?(rpmAxisMax<=350?50:rpmAxisMax<=700?100:Math.ceil(rpmAxisMax/700)*100):(type==='error'?50:25);
+  ctx.font='11px Segoe UI,sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
+  for(let tick=axisMin;tick<=axisMax+1e-7;tick+=steps){
+   const y=yVal(tick,axisMin,axisMax);
+   ctx.strokeStyle='rgba(119,165,196,0.22)';ctx.lineWidth=1;
+   ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(R,y);ctx.stroke();
+   ctx.fillStyle='#a9c6d9';ctx.fillText(mark(tick),L-9,y);
   }
+  ctx.strokeStyle='#426078';ctx.lineWidth=1;ctx.beginPath();
+  ctx.moveTo(L,top);ctx.lineTo(L,bottom);ctx.lineTo(R,bottom);ctx.stroke();
+  ctx.font='11px Segoe UI,sans-serif';ctx.textBaseline='top';ctx.textAlign='left';
+  ctx.fillStyle='#bbd7e9';
+  ctx.fillText(type==='rpm'?'Velocidad (RPM)':type==='error'?'Error (RPM)':'PWM (%)',L+8,top+5);
+  // PWM (izquierda) y error (derecha) pueden coexistir sin mezclar unidades.
+  if(type==='mixed'){
+   ctx.font='10px Segoe UI,sans-serif';ctx.textAlign='left';ctx.fillStyle='#bbaaf3';
+   ctx.fillText('Error ±100 RPM',R-125,top+5);
+   ctx.textAlign='left';ctx.textBaseline='middle';
+   for(let tick=-100;tick<=100;tick+=50){
+    ctx.fillStyle='#c2b3ef';ctx.fillText(String(tick),R+7,yVal(tick,-100,100));
+   }
+  }
+  ctx.save();ctx.beginPath();ctx.rect(L,top,P,H);ctx.clip();
+  for(const [id,field,color,limit] of keys){
+   ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;
+   let pathStarted=false,lastY=bottom;
+   if(k.type!=='points')ctx.beginPath();
+   for(const point of rows){
+    const t=(Number(point.ms)-firstMs)/1000;
+    if(t<t0)continue;
+    const value=Number(point[field]);
+    if(!Number.isFinite(value))continue;
+    const x=px(t);
+    const y=id==='err'
+      ?yVal(Math.max(-100,Math.min(100,value)),-100,100)
+      :yVal(Math.max(0,Math.min(limit,value)),0,limit);
+    if(k.type==='points'){
+      ctx.beginPath();ctx.arc(x,y,2.2,0,Math.PI*2);ctx.fill();
+    }else if(!pathStarted){
+      ctx.moveTo(x,y);pathStarted=true;
+    }else if(k.type==='step'){
+      ctx.lineTo(x,lastY);ctx.lineTo(x,y);
+    }else ctx.lineTo(x,y);
+    lastY=y;
+   }
+   if(k.type!=='points')ctx.stroke();
+  }
+  ctx.restore();
+ };
+ if(split){
+  const mid=T+(B-T)*.59;
+  drawPane(topKeys,T,mid-8,'rpm');
+  drawPane(lowerKeys,mid+6,B,bothSecondary?'mixed':k.err?'error':'pwm');
+ }else if(topKeys.length){
+  drawPane(topKeys,T,B,'rpm');
+ }else if(lowerKeys.length){
+  drawPane(lowerKeys,T,B,bothSecondary?'mixed':k.err?'error':'pwm');
+ }else{
+  ctx.fillStyle='#a9c6d9';ctx.fillText('Selecciona una variable para graficar',L+12,72);
  }
- if(split){const mid=T+(B-T)*.59;chart(topKeys,T,mid-8,topKeys,'RPM · 0–'+rpmAxisMax);chart(lowerKeys,mid+5,B,lowerKeys,'PWM 0–100 % / Error ±100 RPM')}
- else chart(topKeys.length?topKeys:lowerKeys,T,B,topKeys.length?topKeys:lowerKeys,topKeys.length?'RPM · 0–'+rpmAxisMax:'PWM 0–100 % / Error ±100 RPM');
+ // El firmware limita la RPM procesada a 250. Es una advertencia de medición,
+ // no un límite de representación; la gráfica puede crecer automáticamente.
  if(k.rpm&&peak>=249.99){
-  ctx.fillStyle='#e8b86d';ctx.font='10px sans-serif';ctx.textAlign='right';
-  ctx.fillText('RPM limitadas a 250 por firmware',R-4,T+12);
-  ctx.textAlign='left';
+  ctx.fillStyle='#e7b768';ctx.font='10px Segoe UI,sans-serif';
+  ctx.textBaseline='top';ctx.textAlign='right';
+  ctx.fillText('RPM limitadas a 250 por firmware',R-5,T+5);
  }
- ctx.fillStyle='#9eb8ce';ctx.font='10px sans-serif';ctx.fillText('Tiempo desde inicio (s)',R-145,h-8);
+ ctx.textAlign='left';ctx.textBaseline='alphabetic';
 }
 draw=mappedPlot;
 drawAll();
