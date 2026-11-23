@@ -40,6 +40,21 @@
      $('performanceMethod').textContent='Sin muestras de ensayo.';
      return;
    }
+   const names=panel.querySelectorAll('.performance-grid span');
+   const standard=['Subida 10–90 %','Primer alcance','Establecimiento','Sobreimpulso','Error estacionario','PWM ≥ 98 %'];
+   if(trial.mode==='PWM'){
+     const titles=['RPM media final','PWM aplicado','K estimada','τ estimada','Identificación','Duración'];
+     titles.forEach((s,i)=>{if(names[i])names[i].textContent=s});
+     $('perfRise').textContent=num(p.steadyRpm,1,'RPM');
+     $('perfFirst').textContent=num(trial.samples[0]?.pwm,1,'%');
+     $('perfSettle').textContent=num(p.modelK,2,'RPM/duty');
+     $('perfPeak').textContent=num(p.modelTau,2,'s');
+     $('perfSteady').textContent=p.identificationStatus||'Pendiente';
+     $('perfSat').textContent=num(p.duration,1,'s');
+     $('performanceMethod').textContent=trial.id+' · PWM fijo / lazo abierto · K y τ son estimaciones preliminares a validar; no se calculan sobreimpulso ni error PID.';
+     return;
+   }
+   standard.forEach((s,i)=>{if(names[i])names[i].textContent=s});
    $('perfRise').textContent=num(p.rise,2,'s');
    $('perfFirst').textContent=num(p.firstReach,2,'s');
    $('perfSettle').textContent=num(p.settling,2,'s');
