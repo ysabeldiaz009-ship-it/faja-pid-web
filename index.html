@@ -107,7 +107,7 @@ button:active:not(:disabled){transform:translateY(1px)}
         <div class="three">
           <div><label for="kp">Kp</label><input id="kp" type="number" min="0" max="10" step="0.01" value="0.8"></div>
           <div><label for="ki">Ki</label><input id="ki" type="number" min="0" max="10" step="0.01" value="0.2"></div>
-          <div><label for="kd">Kd</label><input id="kd" type="number" min="0" max="10" step="0.01" value="0.05"></div>
+          <div><label for="kd">Kd</label><input id="kd" type="number" min="0" max="10" step="0.01" value="0"></div>
         </div>
         <div class="actions"><button id="apply" class="blue">Aplicar referencia y PID</button></div>
         <div class="actions"><button id="projRun" class="green" disabled>▶ Arrancar</button><button id="projStop" class="red" disabled>■ Detener</button></div>
@@ -230,7 +230,7 @@ button:active:not(:disabled){transform:translateY(1px)}
        <option value="reference">Referencia vs medición</option>
        <option value="model">Modelo vs medición</option>
        <option value="raw">Registro del ensayo</option>
-       <option value="sensor">Diagnóstico del sensor</option>
+       <option value="sensor">Diagnóstico del sensor</option><option value="trials">Comparación entre ensayos</option>
      </select>
    </div>
    <div class="cmp-model-params" id="cmpModelParams">
@@ -276,4 +276,4 @@ button:active:not(:disabled){transform:translateY(1px)}
   <button id="cmpFromMath" hidden></button><button id="cmpExport" hidden></button>
  </div>
 </div>
-<link rel="stylesheet" href="./hmi.css"><link rel="stylesheet" href="./hmi-industrial.css?v=20261123-03"><script src="./config.js"></script><script src="./app.js" defer></script><script src="./extras.js" defer></script><script src="./layout.js" defer></script><script src="./comparison.js" defer></script><script src="./enhancements.js?v=20261123-03" defer></script><link rel="stylesheet" href="./results-compact.css"><script src="./results-compact.js" defer></script></body></html>
+<link rel="stylesheet" href="./hmi.css"><link rel="stylesheet" href="./hmi-industrial.css?v=20261123-03"><script src="./config.js"></script><script src="./app.js?v=ensayos-20261123-1" defer></script><script src="./extras.js?v=ensayos-20261123-1" defer></script><script src="./layout.js" defer></script><script src="./comparison.js?v=ensayos-20261123-1" defer></script><script src="./enhancements.js?v=ensayos-20261123-1" defer></script><link rel="stylesheet" href="./results-compact.css"><script src="./results-compact.js?v=ensayos-20261123-1" defer></script><link rel="stylesheet" href="./trials.css?v=ensayos-20261123-1"><script src="./trials.js?v=ensayos-20261123-1" defer></script></body></html>

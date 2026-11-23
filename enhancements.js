@@ -178,7 +178,7 @@ function mappedPlot(canvas){
  const k=window.fajaPlot, rows=window.fajaSamples||[];
  const d=window.devicePixelRatio||1,w=rect.width,h=Math.max(190,Math.round(rect.height));canvas.width=Math.round(w*d);canvas.height=Math.round(h*d);
  const ctx=canvas.getContext('2d');ctx.scale(d,d);ctx.clearRect(0,0,w,h);
- const L=48,R=w-16,T=20,B=h-25,dt=rows.length?rows[rows.length-1].ms/1000:0,t0=Math.max(0,dt-60),range=Math.max(1,dt-t0);
+ const L=48,R=w-16,T=20,B=h-25,dt=rows.length?(rows[rows.length-1].ms-rows[0].ms)/1000:0,t0=Math.max(0,dt-60),range=dt>60?60:Math.max(10,dt);
  if(!rows.length){ctx.fillStyle='#9db5c9';ctx.font='13px sans-serif';ctx.fillText('Sin muestras del ESP32',L+20,70);return}
  const topKeys=[['set','ref','#49abf5',200],['rpm','rpm','#38cf9b',200]].filter(a=>k[a[0]]);
  const lowerKeys=[['pwm','pwm','#f2b467',100],['err','error','#b69bfc',100]].filter(a=>k[a[0]]);
@@ -189,7 +189,7 @@ function mappedPlot(canvas){
   ctx.fillStyle='#92adc3';ctx.font='10px sans-serif';ctx.fillText(label,L+5,ymin+11);
   for(const [id,field,color,limit] of keys){
    ctx.beginPath();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;let started=false,lastX=0,lastY=0;
-   for(const point of rows){const t=point.ms/1000;if(t<t0)continue;const px=L+(t-t0)/range*(R-L);
+   for(const point of rows){const t=(point.ms-rows[0].ms)/1000;if(t<t0)continue;const px=L+(t-t0)/range*(R-L);
     const v=Number(point[field]);if(!Number.isFinite(v))continue;
     const ratio=id==='err'?(Math.max(-100,Math.min(100,v))+100)/200:Math.max(0,Math.min(limit,v))/limit;
     const py=ymax-ratio*HH;
@@ -203,7 +203,7 @@ function mappedPlot(canvas){
  }
  if(split){const mid=T+(B-T)*.59;chart(topKeys,T,mid-8,topKeys,'RPM · 0–200');chart(lowerKeys,mid+5,B,lowerKeys,'PWM 0–100 % / Error ±100 RPM')}
  else chart(topKeys.length?topKeys:lowerKeys,T,B,topKeys.length?topKeys:lowerKeys,topKeys.length?'RPM · 0–200':'PWM 0–100 % / Error ±100 RPM');
- ctx.fillStyle='#9eb8ce';ctx.font='10px sans-serif';ctx.fillText('Tiempo (s) · últimas 60 s',R-140,h-8);
+ ctx.fillStyle='#9eb8ce';ctx.font='10px sans-serif';ctx.fillText('Tiempo desde inicio (s)',R-145,h-8);
 }
 draw=mappedPlot;
 drawAll();

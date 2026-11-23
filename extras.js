@@ -16,7 +16,7 @@
   second:{fields:[['b1','Numerador b₁',0],['b0','Numerador b₀',120],['a2','Denominador a₂',.1],['a1','Denominador a₁',.7],['a0','Denominador a₀',1]]},
   motor:{fields:[['R','Resistencia R (Ω)',4],['L','Inductancia L (H)',.01],['J','Inercia J (kg·m²)',.0001],['B','Fricción B (N·m·s/rad)',.0001],['Kt','Constante de par Kt',.05],['Ke','Constante Ke',.05]]},
   jury:{fields:[['a1','Coeficiente a₁ en z²+a₁z+a₂',-.9],['a2','Coeficiente a₂ en z²+a₁z+a₂',.2]]},
-  pid:{fields:[['Kp','Kp',.8],['Ki','Ki',.2],['Kd','Kd',.05],['Ts','Ts (s)',.1],['r','Referencia r[k] (RPM)',120],['y','Medición y[k] (RPM)',90],['prev','RPM anterior y[k−1]',88],['I','Integral anterior I[k−1]',4],['D','Derivada filtrada anterior',0]]},
+  pid:{fields:[['Kp','Kp',.8],['Ki','Ki',.2],['Kd','Kd',0],['Ts','Ts (s)',.1],['r','Referencia r[k] (RPM)',120],['y','Medición y[k] (RPM)',90],['prev','RPM anterior y[k−1]',88],['I','Integral anterior I[k−1]',4],['D','Derivada filtrada anterior',0]]},
   speed:{fields:[['rpm','Velocidad medida (RPM)',120],['radio','Radio efectivo del rodillo (mm)',15]]},
   states:{fields:[['a11','A₁₁',.8],['a12','A₁₂',.1],['a21','A₂₁',0],['a22','A₂₂',.7],['b1','B₁',1],['b2','B₂',.4],['c1','C₁',1],['c2','C₂',0],['d','D',0]]}
  };
@@ -158,6 +158,7 @@
  }
  let samples=[],previousTrend=null;
   window.fajaSamples=samples;
+  window.fajaReplaceSamples=function(next){samples=next;window.fajaSamples=samples;const c=by("dataCounter");if(c)c.textContent=samples.length+" muestras";drawAll();};
  let timerAvailable=false;
  const origReceive=receive;
  receive=function(line){
@@ -179,7 +180,7 @@
    const [ms,ref,rpm,error,pwm,running,fault]=v;
    updateTemperatureModel(ms,pwm,running,fault);
    const meta=window.fajaTestMetadata?window.fajaTestMetadata():{};
-    samples.push({ms,ref,rpm,error,pwm,running,fault,...meta});
+    if(!window.fajaTrialManager||window.fajaTrialManager.isActive())samples.push({ms,ref,rpm,error,pwm,running,fault,...meta,...(window.fajaTrialManager?.currentMeta(ms)||{})});
    if(samples.length>30000)samples.shift();
    by('dataCounter').textContent=samples.length+' muestras';
    by('dataDuration').textContent=(samples.length>1?(ms-samples[0].ms)/1000:0).toFixed(1)+' s registrados';
@@ -195,13 +196,15 @@
    }
  };
  by('saveCsv').addEventListener('click',()=>{
-   if(!samples.length){log('No hay muestras para exportar.');return;}
-   const header='tiempo_ms,referencia_rpm,rpm_real,error_rpm,pwm_pct,marcha,falla,modo,kp,ki,kd,ensayo,diametro_rodillo_cm,meta_tiempo_ms,rpm_sin_filtrar,edad_pulso_ms,periodo_pulso_ms,pulsos,modelo_aplicado,K_modelo_rpm_por_duty,tau_modelo_s,rpm_modelo,error_modelo_rpm,error_modelo_pct,Ts_controlador_s,pulsos_por_vuelta';
-   const rows=samples.map(x=>[x.ms,x.ref,x.rpm,x.error,x.pwm,x.running,x.fault,x.mode||'',x.kp??'',x.ki??'',x.kd??'',x.testId||'',x.diameter??'',x.metaTimestamp??'',x.rawRpm??'',x.pulseAgeMs??'',x.pulsePeriodMs??'',x.pulseCount??'',x.modelApplied?1:0,x.modelApplied?(x.modelK??''):'',x.modelApplied?(x.modelTau??''):'',x.modelApplied?(x.pred??''):'',x.modelApplied&&x.active?(x.absModel??''):'',x.modelApplied&&x.active&&Number.isFinite(x.errorModelPct)?x.errorModelPct:'',0.1,1].join(','));
+   if(!samples.length&&!window.fajaTrialManager?.exportSamples().length){log('No hay muestras para exportar.');return;}
+   const header='tiempo_ms,referencia_rpm,rpm_real,error_rpm,pwm_pct,marcha,falla,modo,kp,ki,kd,ensayo,diametro_rodillo_cm,meta_tiempo_ms,rpm_sin_filtrar,edad_pulso_ms,periodo_pulso_ms,pulsos,modelo_aplicado,K_modelo_rpm_por_duty,tau_modelo_s,rpm_modelo,error_modelo_rpm,error_modelo_pct,Ts_controlador_s,pulsos_por_vuelta,id_prueba,t_desde_arranque_s,fecha_inicio';
+   const source=window.fajaTrialManager?window.fajaTrialManager.exportSamples():samples;
+   if(!source.length){log("No hay ensayos registrados para exportar.");return;}
+   const rows=source.map(x=>[x.ms,x.ref,x.rpm,x.error,x.pwm,x.running,x.fault,x.mode||'',x.kp??'',x.ki??'',x.kd??'',x.testId||'',x.diameter??'',x.metaTimestamp??'',x.rawRpm??'',x.pulseAgeMs??'',x.pulsePeriodMs??'',x.pulseCount??'',x.modelApplied?1:0,x.modelApplied?(x.modelK??''):'',x.modelApplied?(x.modelTau??''):'',x.modelApplied?(x.pred??''):'',x.modelApplied&&x.active?(x.absModel??''):'',x.modelApplied&&x.active&&Number.isFinite(x.errorModelPct)?x.errorModelPct:'',0.1,1,x.trialId||'',x.elapsedSec??'',x.trialStart||''].join(','));
    const blob=new Blob(['\ufeff'+[header,...rows].join('\r\n')],{type:'text/csv;charset=utf-8'});
    const url=URL.createObjectURL(blob),anchor=document.createElement('a');
    anchor.href=url;anchor.download='Faja_PID_datos_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.csv';document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-   log('CSV exportado: '+samples.length+' muestras.');
+   log('CSV exportado: '+source.length+' muestras.');
  });
  by('clearData').addEventListener('click',()=>{
    if(last.run){log('Detén el motor antes de limpiar registros.');return;}

@@ -57,7 +57,8 @@
   put('compareSource','Modelo actualizado · historial reiniciado');
  }
  e('cmpApply').addEventListener('click',applyModel);
- e('cmpClear').addEventListener('click',reset);
+ window.fajaResetModelTrial=reset;
+ e('cmpClear').addEventListener('click',()=>{if(!window.fajaTrialManager)reset()});
  e('cmpFromMath').addEventListener('click',()=>{
   if(e('mathTemplate').value!=='first'){
     put('compareSource','Selecciona «Primer orden» en Proyecto > Ecuaciones.');
@@ -92,6 +93,7 @@
   if(raw[0]!=='DATA'||raw.length<8)return;
   const v=raw.slice(1,8).map(Number);
   if(v.some(x=>!Number.isFinite(x)))return;
+  if(window.fajaTrialManager&&!window.fajaTrialManager.isActive())return;
   const [ms,ref,rpm,_error,pwm,running,fault]=v;
   if(model.lastMs!==null&&(ms<model.lastMs||ms-model.lastMs>5000)){
     // Reset del firmware o salto de telemetría: una respuesta corrida no es comparable.

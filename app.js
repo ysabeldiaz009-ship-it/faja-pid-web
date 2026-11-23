@@ -44,7 +44,7 @@ function receive(line){
   const belt=el('belt');const moving=run===1&&!fault&&rpm>1;belt.classList.toggle('moving',moving);
   if(moving){belt.style.setProperty('--spin',Math.max(.18,Math.min(3,60/rpm))+'s');belt.style.setProperty('--track',Math.max(.2,Math.min(3,60/rpm))+'s')}
   el('beltText').textContent=moving?'Velocidad: '+rpm.toFixed(1)+' RPM':'Faja detenida';
-  records.push({time:ms/1000,set,rpm});if(records.length>450)records.shift();el('sampleCount').textContent=records.length+' lecturas';drawAll();
+  if(!window.fajaTrialManager){records.push({time:ms/1000,set,rpm});if(records.length>450)records.shift();el('sampleCount').textContent=records.length+' lecturas';}drawAll();
  }else if(['READY','ACK','ERR','FAULT','CAPS','VER'].includes(a[0])&&line!=='ACK,PING')log(line);
 }
 // Web Serial puede entregar un stream nuevo después de FramingError/ParityError/BreakError.
