@@ -13,11 +13,25 @@
  function nextId(){return 'E'+String(++sequence).padStart(2,'0')}
  function list(){return active?[...trials,active]:trials}
  function viewed(){return list().find(x=>x.id===selected)||null}
+ function showSnapshot(){
+   const t=viewed(),row=t?.samples?.[t.samples.length-1];
+   if(!row){
+     if(!active&&!t){
+       const live=last;
+       for(const [key,value,digits] of [['projSet',live.set,0],['projRpm',live.rpm,1],['projError',live.err,1],['projPwm',live.pwm,1]])
+         $(key).textContent=Number.isFinite(value)?Number(value).toFixed(digits):'—';
+     }
+     return;
+   }
+   const vals=[['projSet',row.ref,0],['projRpm',row.rpm,1],['projError',row.error,1],['projPwm',row.pwm,1]];
+   for(const [id,value,digits] of vals)$(id).textContent=Number.isFinite(Number(value))?Number(value).toFixed(digits):'—';
+ }
  function pick(id){
    if(active&&id!==active.id)return;
    const trial=list().find(x=>x.id===id);
    selected=trial?trial.id:null;
    window.fajaReplaceSamples(trial?trial.samples:[]);
+   showSnapshot();
    if(typeof window.renderCompactResults==='function')window.renderCompactResults();
    sync();
  }
@@ -69,6 +83,7 @@
    const del=$('trialDiscard');if(del)del.disabled=!!active||!trial;
    const b=$('cmpClear');if(b){b.textContent='Descartar ensayo';b.disabled=!!active||!trial}
    const count=$('sampleCount');if(count)count.textContent=(trial?.samples.length||0)+' muestras';
+   showSnapshot();
  }
  const monitor=document.querySelector('#projectMonitorPanel .chart-workspace .card-heading');
  if(monitor){

@@ -17,7 +17,7 @@ function tab(mode){
  if(mode==='project')drawAll();
 }
 el('projectTab').onclick=()=>tab('project');el('plantTab').onclick=()=>tab('plant');
-function setTarget(value){let v=Number(value);if(!Number.isFinite(v))v=0;v=Math.min(200,Math.max(0,v));for(const id of ['projSlider','projTarget','plantSlider','plantTarget'])el(id).value=v;el('projSet').textContent=v;el('plantRef').textContent=v;last.set=v}
+function setTarget(value){let v=Number(value);if(!Number.isFinite(v))v=0;v=Math.min(200,Math.max(0,v));for(const id of ['projSlider','projTarget','plantSlider','plantTarget'])el(id).value=v;if(!window.fajaTrialManager?.viewed()||window.fajaTrialManager.isActive())el('projSet').textContent=v;el('plantRef').textContent=v;last.set=v}
 for(const id of ['projSlider','projTarget','plantSlider','plantTarget'])el(id).oninput=()=>setTarget(el(id).value);
 function readConfig(){const v=[Number(el('projTarget').value),Number(el('kp').value),Number(el('ki').value),Number(el('kd').value)];if(v.some(x=>!Number.isFinite(x))||v[0]<0||v[0]>200||v.slice(1).some(x=>x<0||x>10))throw Error('Referencia 0–200 RPM; Kp/Ki/Kd 0–10');return v}
 async function send(line){if(!online)throw Error('ESP32 desconectado');if(window.fajaUSB)return window.fajaUSB.send(line);if(!writer)throw Error('Puerto USB no disponible');queue=queue.catch(()=>{}).then(()=>writer.write(new TextEncoder().encode(line+'\n')));await queue}
@@ -35,7 +35,9 @@ function receive(line){
  if(a[0]==='DATA'&&a.length>=8){
   const v=a.slice(1,8).map(Number);if(v.some(x=>!Number.isFinite(x)))return;
   const [ms,set,rpm,err,pwm,run,fault]=v;last={set,rpm,err,pwm,run:run===1,fault:fault===1};lastDataTime=Date.now();
-  for(const [id,value,dec] of [['projSet',set,0],['projRpm',rpm,1],['projError',err,1],['projPwm',pwm,1],['plantRef',set,0],['plantRpm',rpm,1],['plantPwm',pwm,1]])el(id).textContent=value.toFixed(dec);
+  const freezeProject=window.fajaTrialManager?.viewed()&&run!==1;
+  if(!freezeProject)for(const [id,value,dec] of [['projSet',set,0],['projRpm',rpm,1],['projError',err,1],['projPwm',pwm,1]])el(id).textContent=value.toFixed(dec);
+  for(const [id,value,dec] of [['plantRef',set,0],['plantRpm',rpm,1],['plantPwm',pwm,1]])el(id).textContent=value.toFixed(dec);
   const state=fault?'FALLA':run===1?'EN MARCHA':'DETENIDO';
   el('plantState').textContent=state;el('plantState').className='state'+(fault?' fault':run===1?' running':'');
   el('projectState').textContent=state;el('projectNotice').textContent=fault?'Sin señal del sensor. Motor detenido.':run===1?'Motor en marcha':'Motor detenido';
