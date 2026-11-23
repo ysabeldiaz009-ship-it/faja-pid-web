@@ -68,6 +68,11 @@
    persist();pick(selected);drawAll();
  }
  function exportSamples(){return list().flatMap(x=>x.samples)}
+ function newSeries(){
+   if(active||last.run){log('Detén el motor antes de iniciar una serie nueva.');return false;}
+   if(!window.confirm('¿Iniciar serie nueva? Se descartarán los ensayos temporales E01, E02… Guarda el CSV si deseas conservarlos.'))return false;
+   trials=[];selected=null;sequence=0;lastBootMs=null;persist();pick(null);sync();drawAll();return true;
+ }
  function sync(){
    const trial=viewed();
    const message=active?'Registrando '+active.id:trial?'Ensayo '+trial.id+' · '+trial.samples.length+' muestras':'Sin ensayos';
@@ -128,7 +133,7 @@
  };
  const previousConn=conn;
  conn=function(value){previousConn(value);if(!value){endTrial('desconexión');prevRunning=false}sync()};
- window.fajaTrialManager={isActive:()=>!!active,currentMeta,exportSamples,discardSelected,select:pick,list,viewed};
+ window.fajaTrialManager={isActive:()=>!!active,currentMeta,exportSamples,discardSelected,newSeries,select:pick,list,viewed};
  if(trials.length){selected=trials[trials.length-1].id;window.fajaReplaceSamples(trials[trials.length-1].samples);}
  else window.fajaReplaceSamples([]);
  sync();drawAll();

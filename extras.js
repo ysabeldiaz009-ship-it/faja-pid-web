@@ -180,7 +180,7 @@
    const [ms,ref,rpm,error,pwm,running,fault]=v;
    updateTemperatureModel(ms,pwm,running,fault);
    const meta=window.fajaTestMetadata?window.fajaTestMetadata():{};
-    if(!window.fajaTrialManager||window.fajaTrialManager.isActive())samples.push({ms,ref,rpm,error,pwm,running,fault,...meta,...(window.fajaTrialManager?.currentMeta(ms)||{})});
+   if((!window.fajaTrialManager||window.fajaTrialManager.isActive())&&running===1&&!fault)samples.push({ms,ref,rpm,error,pwm,running,fault,...meta,...(window.fajaTrialManager?.currentMeta(ms)||{})});
    if(samples.length>30000)samples.shift();
    by('dataCounter').textContent=samples.length+' muestras';
    by('dataDuration').textContent=(samples.length>1?(ms-samples[0].ms)/1000:0).toFixed(1)+' s registrados';

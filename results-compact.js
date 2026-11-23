@@ -51,7 +51,7 @@ function makeRows(mode){
  return recent.filter(r=>Number.isFinite(r.pulseCount)).map(r=>[fmt(r.ms/1000,2),fmt(r.rawRpm),fmt(r.pulseAgeMs,0),fmt(r.pulsePeriodMs,0),fmt(r.pulseCount,0)]);
 }
 function update(){
- const mode=state.mode, parts=headings[mode],rows=makeRows(mode);
+ const mode=headings[state.mode]?state.mode:'reference', parts=headings[mode],rows=makeRows(mode);
  const needModel=mode==='model';
  const storedModel=samples().some(x=>x.modelApplied&&Number.isFinite(x.pred));
  id('cmpModelParams').hidden=!needModel;

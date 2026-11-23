@@ -1,0 +1,18 @@
+/* Resultados: comparación explicable, momentos clave, detalle técnico bajo demanda */
+#projectDataPanel .analysis-page{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:5px 0 1px;flex-shrink:0}
+#projectDataPanel .analysis-page[hidden]{display:none!important}
+#analysisPageStatus{font-size:10px;color:#b0c8d9;min-width:96px;text-align:center}
+#analysisPrev,#analysisNext,#trialNewSeries{font-size:10px;border-radius:6px;padding:6px 9px;background:#213c50;border:1px solid #46637b;color:#dcecf4}
+#trialNewSeries{margin-left:4px;white-space:nowrap}
+#projectDataPanel .cmp-table td:first-child,#projectDataPanel .cmp-table th:first-child{text-align:left}
+#projectDataPanel .cmp-table td{font-variant-numeric:tabular-nums}
+#projectDataPanel.is-compare-summary .performance-panel{display:none}
+#projectDataPanel.is-compare-summary .cmp-analysis{display:none}
+#projectDataPanel.is-compare-summary .cmp-diagnostics{display:none}
+#projectDataPanel.is-compare-summary .compare-layout{grid-template-columns:1fr}
+#projectDataPanel.is-compare-summary .cmp-side{display:none}
+#projectDataPanel.is-compare-summary .cmp-table-card{width:100%}
+#projectDataPanel .trial-toolbar{flex-wrap:wrap}
+#projectDataPanel .comparison-controls{align-items:center}
+#projectDataPanel .cmp-table-container{overflow:auto}
+@media(max-width:1000px){#projectDataPanel .analysis-page{justify-content:center}#projectDataPanel .cmp-table{min-width:570px}}
