@@ -20,31 +20,31 @@ originalPlant.forEach(n=>legacy.appendChild(n));
 plant.appendChild(legacy);
 const hmi=document.createElement('div');hmi.className='hmi-board';
 hmi.innerHTML=`
-<div class="hmi-head"><div><span class="hmi-overline">SISTEMA DE TRANSPORTE</span><h2>Faja transportadora · Operación</h2></div><strong id="hmiStatus" class="hmi-state">SIN DATOS</strong></div>
+<div class="hmi-head"><div><span class="hmi-overline">SISTEMA DE TRANSPORTE · LT-01</span><h2>Faja transportadora <span class="hmi-heading-chip">PANEL DE OPERACIÓN</span></h2><small class="hmi-subtitle">Visualización y mando del motorreductor ESP32</small></div><div class="hmi-status-unit"><span>ESTADO DEL EQUIPO</span><strong id="hmiStatus" class="hmi-state">SIN DATOS</strong></div></div>
 <div class="hmi-grid">
  <div class="hmi-process">
-   <div class="hmi-process-head"><b>Vista del proceso</b><span id="hmiMotion">FAJA DETENIDA</span></div>
-   <div id="hmiBelt" class="hmi-belt"><div class="hmi-belt-track"></div><div class="hmi-roller l"></div><div class="hmi-roller r"></div><div class="hmi-support left"></div><div class="hmi-support right"></div></div>
+   <div class="hmi-process-head"><b>01 / SINÓPTICO DE LA LÍNEA</b><span id="hmiMotion">FAJA DETENIDA</span></div><div class="hmi-process-description">TRANSPORTADOR LT-01 <span>SENTIDO DE AVANCE →</span></div>
+   <div id="hmiBelt" class="hmi-belt"><div class="hmi-belt-track"></div><div class="hmi-roller l"></div><div class="hmi-roller r"></div><div class="hmi-support left"></div><div class="hmi-support right"></div><div class="hmi-drive-unit"><span class="hmi-motor-icon">M</span><small>MOTOR</small></div><div class="hmi-sensor-unit"><i></i><span>SENSOR</span></div><div class="hmi-belt-support-base"></div></div><div class="hmi-line-status"><span><i id="hmiPilotMotor" class="status-lamp"></i> MOTOR</span><span><i id="hmiPilotSensor" class="status-lamp"></i> LECTURA</span><span><i id="hmiPilotAlarm" class="status-lamp"></i> ALARMA</span></div>
    <div class="hmi-vitals">
-     <div class="hmi-vital primary"><span>VELOCIDAD LINEAL CALCULADA</span><strong><span id="hmiSpeed">—</span><small>m/s</small></strong><em>RPM del sensor × perímetro del rodillo</em></div>
+     <div class="hmi-vital primary"><span>VELOCIDAD DE FAJA</span><strong><span id="hmiSpeed">—</span><small>m/s</small></strong><em>RPM del sensor × perímetro del rodillo</em></div>
      <div class="hmi-vital"><span>VOLTAJE MEDIO IDEAL</span><strong><span id="hmiVoltage">—</span><small>V</small></strong><em>Estimación por PWM; no medido</em></div>
      <div class="hmi-vital"><span>TEMPERATURA</span><strong><span id="hmiTemperature">25,0</span><small>°C</small></strong><em>Simulación software; no medida</em></div>
    </div>
    <p class="hmi-footnote">Sin banda física, la velocidad en m/s representa una equivalencia calculada. La animación sigue las RPM medidas; no sustituye una medición lineal de la banda.</p>
  </div>
  <aside class="hmi-ops">
-   <div class="hmi-panel-label">MANDO DE OPERACIÓN</div>
+   <div class="hmi-console-header">ESTACIÓN DE MANDO <strong>CP-01</strong></div><div class="hmi-panel-label">SEÑALIZACIÓN DE ESTADO</div><div class="hmi-annunciators"><span><i id="hmiPilotReady" class="pilot-light"></i> LISTO</span><span><i id="hmiPilotRunning" class="pilot-light"></i> MARCHA</span><span><i id="hmiPilotFault" class="pilot-light"></i> FALLA</span></div><div class="hmi-panel-label">MANDO DE OPERACIÓN</div>
    <div class="hmi-commands">
-     <button id="hmiStart" class="hmi-btn start">▶ <span>INICIAR</span></button>
-     <button id="hmiStop" class="hmi-btn stop">■ <span>DETENER</span></button>
-     <button id="hmiEstop" class="hmi-btn emergency">⛔ <span>PARADA SOFTWARE</span></button>
+     <button id="hmiStart" class="hmi-btn start" aria-label="Iniciar motor"><span class="push-housing"><span class="push-face"><span class="push-symbol">I</span></span></span><span class="button-caption">INICIAR</span></button>
+     <button id="hmiStop" class="hmi-btn stop" aria-label="Detener motor"><span class="push-housing"><span class="push-face"><span class="push-symbol">O</span></span></span><span class="button-caption">DETENER</span></button>
+     <button id="hmiEstop" class="hmi-btn emergency" aria-label="Parada software con rearme"><span class="estop-plate"><span class="estop-collar"><span class="estop-head"></span></span></span><span class="button-caption">PARADA SOFTWARE</span><small>BLOQUEO / REARME</small></button>
    </div>
    <button id="hmiReset" class="hmi-reset" hidden>Rearmar parada software</button>
    <div class="hmi-panel-label">VELOCIDAD DE TRABAJO</div>
    <div class="hmi-presets">
-     <button data-hmi-rpm="60">LENTA</button>
-     <button data-hmi-rpm="110">MEDIA</button>
-     <button data-hmi-rpm="150">RÁPIDA</button>
+     <button data-hmi-rpm="60"><i class="selector-led"></i><span>LENTA</span><small>01</small></button>
+     <button data-hmi-rpm="110"><i class="selector-led"></i><span>MEDIA</span><small>02</small></button>
+     <button data-hmi-rpm="150"><i class="selector-led"></i><span>RÁPIDA</span><small>03</small></button>
    </div>
    <div class="hmi-setpoint">Consigna equivalente: <b id="hmiTarget">—</b> <span>m/s</span></div>
    <div id="hmiMessage" class="hmi-message">Esperando comunicación del ESP32.</div>
@@ -95,6 +95,13 @@ function refreshHmi(){
  if(active&&rpm>1)$('hmiBelt').style.setProperty('--hmi-spin',Math.max(.3,Math.min(4,60/rpm))+'s');
  const target=scaleSpeed(Number($('projTarget').value));$('hmiTarget').textContent=target===null?'—':target.toFixed(3);
  $('hmiReset').hidden=!emergency;
+ const pilot=(id,on,color)=>{const node=$(id);if(node)node.classList.toggle(color+'-on',Boolean(on))};
+ pilot('hmiPilotReady',!stale&&!emergency&&!lastTelemetry.fault,'green');
+ pilot('hmiPilotRunning',active,'green');
+ pilot('hmiPilotFault',!stale&&(emergency||lastTelemetry.fault),'red');
+ pilot('hmiPilotMotor',active,'green');
+ pilot('hmiPilotSensor',!stale&&lastTelemetry.rpm>0,'green');
+ pilot('hmiPilotAlarm',!stale&&(emergency||lastTelemetry.fault),'red');
  $('hmiStart').disabled=!online||emergency||stale;
  rpmButtons.forEach(b=>b.classList.toggle('selected',Number(b.dataset.hmiRpm)===Number($('projTarget').value)));
 }
