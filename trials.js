@@ -10,7 +10,11 @@
  function persist(){try{sessionStorage.setItem(KEY,JSON.stringify(trials.slice(-MAX)))}catch(e){log('Almacenamiento temporal lleno: conserva el CSV de tus ensayos.');}}
  function fmt(v,n=1){return Number.isFinite(v)?Number(v).toFixed(n):'—'}
  function currentMeta(ms){return active?{trialId:active.id,trialStart:active.started,elapsedSec:Math.max(0,(ms-active.firstMs)/1000).toFixed(2),supplyV:active.supplyV,load:active.load,notes:active.notes}:{}}
- function nextId(){return 'E'+String(++sequence).padStart(2,'0')}
+ function nextId(){
+   // Numeración según ensayos conservados, nunca los ya descartados.
+   sequence=Math.max(0,...trials.map(x=>parseInt(String(x.id).match(/^E(\d+)$/)?.[1]||'0',10)));
+   return 'E'+String(++sequence).padStart(2,'0');
+ }
  function list(){return active?[...trials,active]:trials}
  function viewed(){return list().find(x=>x.id===selected)||null}
  function showSnapshot(){
@@ -65,6 +69,8 @@
    const t=viewed();if(!t)return;
    if(!window.confirm('¿Descartar '+t.id+'? Este ensayo se eliminará del registro temporal.'))return;
    trials=trials.filter(x=>x.id!==t.id);selected=trials.length?trials[trials.length-1].id:null;
+   // Si el último ensayo se descartó, su número queda disponible nuevamente.
+   sequence=Math.max(0,...trials.map(x=>parseInt(String(x.id).match(/^E(\d+)$/)?.[1]||'0',10)));
    persist();pick(selected);drawAll();
  }
  function exportSamples(){return list().flatMap(x=>x.samples)}
@@ -88,6 +94,9 @@
    const del=$('trialDiscard');if(del)del.disabled=!!active||!trial;
    const b=$('cmpClear');if(b){b.textContent='Descartar ensayo';b.disabled=!!active||!trial}
    const count=$('sampleCount');if(count)count.textContent=(trial?.samples.length||0)+' muestras';
+   // El identificador mostrado debe reflejar la próxima prueba, si no hay una activa.
+   const idInput=$('engTestId');
+   if(idInput&&!active)idInput.value='E'+String(Math.max(0,...trials.map(x=>parseInt(String(x.id).match(/^E(\d+)$/)?.[1]||'0',10)))+1).padStart(2,'0');
    showSnapshot();
  }
  const monitor=document.querySelector('#projectMonitorPanel .chart-workspace .card-heading');
