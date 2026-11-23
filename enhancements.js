@@ -289,7 +289,17 @@ function mappedPlot(canvas){
  const ctx=canvas.getContext('2d');ctx.scale(d,d);ctx.clearRect(0,0,w,h);
  const L=48,R=w-16,T=20,B=h-25,dt=rows.length?(rows[rows.length-1].ms-rows[0].ms)/1000:0,t0=Math.max(0,dt-60),range=dt>60?60:Math.max(10,dt);
  if(!rows.length){ctx.fillStyle='#9db5c9';ctx.font='13px sans-serif';ctx.fillText('Sin muestras del ESP32',L+20,70);return}
- const topKeys=[['set','ref','#49abf5',200],['rpm','rpm','#38cf9b',200]].filter(a=>k[a[0]]);
+ // Eje vertical automático para no recortar sobreimpulsos superiores a 200 RPM.
+ // Se calcula con las lecturas visibles (últimos 60 s); 200 RPM es solo el mínimo de escala.
+ const peak=rows.reduce((highest,p)=>{
+   const t=(p.ms-rows[0].ms)/1000;
+   if(t<t0)return highest;
+   const ref=k.set?Number(p.ref):0,actual=k.rpm?Number(p.rpm):0;
+   return Math.max(highest,Number.isFinite(ref)?ref:0,Number.isFinite(actual)?actual:0);
+ },0);
+ const rpmAxisMax=Math.max(200,Math.ceil(peak*1.1/50)*50);
+ window.fajaGraphAxisMax=rpmAxisMax;
+ const topKeys=[['set','ref','#49abf5',rpmAxisMax],['rpm','rpm','#38cf9b',rpmAxisMax]].filter(a=>k[a[0]]);
  const lowerKeys=[['pwm','pwm','#f2b467',100],['err','error','#b69bfc',100]].filter(a=>k[a[0]]);
  const split=topKeys.length&&lowerKeys.length;
  function chart(group,ymin,ymax,keys,label){
@@ -310,8 +320,13 @@ function mappedPlot(canvas){
    }ctx.stroke();
   }
  }
- if(split){const mid=T+(B-T)*.59;chart(topKeys,T,mid-8,topKeys,'RPM · 0–200');chart(lowerKeys,mid+5,B,lowerKeys,'PWM 0–100 % / Error ±100 RPM')}
- else chart(topKeys.length?topKeys:lowerKeys,T,B,topKeys.length?topKeys:lowerKeys,topKeys.length?'RPM · 0–200':'PWM 0–100 % / Error ±100 RPM');
+ if(split){const mid=T+(B-T)*.59;chart(topKeys,T,mid-8,topKeys,'RPM · 0–'+rpmAxisMax);chart(lowerKeys,mid+5,B,lowerKeys,'PWM 0–100 % / Error ±100 RPM')}
+ else chart(topKeys.length?topKeys:lowerKeys,T,B,topKeys.length?topKeys:lowerKeys,topKeys.length?'RPM · 0–'+rpmAxisMax:'PWM 0–100 % / Error ±100 RPM');
+ if(k.rpm&&peak>=249.99){
+  ctx.fillStyle='#e8b86d';ctx.font='10px sans-serif';ctx.textAlign='right';
+  ctx.fillText('RPM limitadas a 250 por firmware',R-4,T+12);
+  ctx.textAlign='left';
+ }
  ctx.fillStyle='#9eb8ce';ctx.font='10px sans-serif';ctx.fillText('Tiempo desde inicio (s)',R-145,h-8);
 }
 draw=mappedPlot;
