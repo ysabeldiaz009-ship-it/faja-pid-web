@@ -56,26 +56,117 @@ plant.appendChild(hmi);
 const controls=$('projectMonitorPanel').querySelector('.controls-workspace');
 const engineering=document.createElement('div');engineering.className='eng-mode';
 engineering.innerHTML=`
-<div class="eng-mode-title"><b>Modo de ensayo</b><small>El cambio exige motor detenido</small></div>
+<div class="eng-mode-title"><b>Modo de ensayo</b><small>Selección automática · motor detenido</small></div>
 <div class="eng-mode-choice">
  <label><input type="radio" name="engMode" value="PID" checked> PID · lazo cerrado</label>
  <label><input type="radio" name="engMode" value="PWM"> PWM fijo · lazo abierto</label>
 </div>
-<div class="eng-mode-fields">
+<div id="engPwmFields" class="eng-mode-fields" hidden>
  <label>Salida PWM (%)<input id="engFixedPwm" type="number" min="0" max="100" step="1" value="60"></label>
- <button id="engModeApply" type="button">Aplicar modo</button>
- <button id="engPwmApply" type="button">Aplicar PWM fijo</button>
+ <span class="eng-auto-hint">Se configura al elegir PWM o al cambiar este valor. No arranca el motor.</span>
 </div>
-<div class="eng-mode-status" id="engModeStatus">Modo V4/V5: esperando verificación del ESP32.</div>
+<div class="eng-mode-status" id="engModeStatus" role="status" aria-live="polite">Esperando confirmación de modo desde ESP32.</div>
 <div class="eng-mode-title"><b>Configuración de medición</b><small>Solo para conversión y trazabilidad</small></div>
 <div class="eng-mode-fields">
  <label>Rodillo motriz Ø (cm)<input id="engDiameter" type="number" step="0.1" min="0.1" placeholder="Medir"></label>
  <label>ID del ensayo<input id="engTestId" type="text" maxlength="32" value="E01"></label>
 </div>
 `;
-controls.appendChild(engineering);
-let confirmedMode='PID', emergency=false, lastTelemetry=null, lastTelemetryAt=0;
+// Elegir el modo es el primer paso de operación, antes de fijar PID o PWM.
+controls.insertBefore(engineering,controls.querySelector('label[for="projTarget"]'));
+let confirmedMode=null, requestedMode='PID', emergency=false, lastTelemetry=null, lastTelemetryAt=0;
+let modeBusy=false,pwmAcknowledged=null,ackRequest=null,pwmModeInitialized=false,lastPlotMode=null;
+const modeInputs=[...engineering.querySelectorAll('input[name="engMode"]')];
+const pidBlocks=[controls.querySelector('label[for="projTarget"]'),controls.querySelector('.reference-control'),
+  controls.querySelector('h4'),controls.querySelector('.three'),$('apply').closest('.actions'),controls.querySelector('.micro-note')].filter(Boolean);
 function notice(t){$('engModeStatus').textContent=t;$('hmiMessage').textContent=t}
+function validPwmValue(){const raw=$('engFixedPwm').value.trim(),x=Number(raw);return raw!==''&&Number.isFinite(x)&&x>=0&&x<=100?x:null}
+function modeReady(){return online&&!emergency&&!modeBusy&&confirmedMode===requestedMode&&
+ (requestedMode==='PID'||(validPwmValue()!==null&&pwmAcknowledged===validPwmValue()))}
+window.fajaModeReady=modeReady;
+window.fajaIsPidMode=()=>requestedMode==='PID';
+function visibleMode(){
+ const pwm=requestedMode==='PWM';
+ $('engPwmFields').hidden=!pwm;
+ pidBlocks.forEach(x=>x.hidden=pwm);
+ const captions=document.querySelectorAll('.compact-kpis .kpi .caption');
+ if(captions[0])captions[0].textContent=pwm?'REFERENCIA PID · NO APLICA':'REFERENCIA';
+ if(captions[2])captions[2].textContent=pwm?'ERROR PID · NO APLICA':'ERROR';
+ document.body.classList.toggle('faja-pwm-mode',pwm);
+ if(window.fajaPlot&&lastPlotMode!==requestedMode){
+   lastPlotMode=requestedMode;
+   window.fajaPlot.set=!pwm;
+   const select=document.querySelector('.eng-plots [data-plot="set"]');
+   if(select)select.checked=!pwm;
+   drawAll();
+ }
+ modeInputs.forEach(x=>{x.checked=x.value===requestedMode;x.disabled=!online||!!last.run||modeBusy});
+ $('engFixedPwm').disabled=!online||!!last.run||modeBusy;
+ for(const id of ['projRun','plantRun','hmiStart'])if($(id))$(id).disabled=!modeReady()||!!last.run;
+}
+function announceMode(){
+ if(!online){notice('SIN CONEXIÓN · conecta ESP32 para confirmar PID o PWM.');return;}
+ if(modeBusy){notice('CONFIGURANDO · esperando confirmación del ESP32. Arranque bloqueado.');return;}
+ if(!confirmedMode){notice('ESPERANDO MODO · aguardando datos del ESP32.');return;}
+ if(requestedMode!==confirmedMode){notice('MODO NO CONFIRMADO · no arranques hasta configurar el ESP32.');return;}
+ if(requestedMode==='PWM'){
+   const value=validPwmValue();
+   if(value===null){notice('PWM INVÁLIDO · introduce un valor entre 0 y 100 %.');return;}
+   if(pwmAcknowledged!==value){notice('PWM PENDIENTE · falta confirmar '+value+' % desde ESP32.');return;}
+   notice('✓ PWM FIJO CONFIRMADO · '+value.toFixed(1)+' % PROGRAMADO · MOTOR '+(last.run?'EN MARCHA':'DETENIDO')+'.');
+ }else notice('✓ PID CONFIRMADO · referencia y ganancias disponibles · MOTOR '+(last.run?'EN MARCHA':'DETENIDO')+'.');
+}
+async function commandConfirmed(command,matcher){
+ if(ackRequest)throw Error('Hay otra orden de configuración pendiente.');
+ const ack=new Promise((resolve,reject)=>{
+   const pending={matcher,resolve,reject,timer:null};
+   pending.timer=setTimeout(()=>{if(ackRequest===pending){ackRequest=null;reject(Error('El ESP32 no confirmó '+command+'.'))}},2800);
+   ackRequest=pending;
+ });
+ try{await send(command)}catch(err){
+   const pending=ackRequest;
+   if(pending){clearTimeout(pending.timer);ackRequest=null;pending.reject(err);}
+ }
+ return ack;
+}
+async function setPwmFromInput(){
+ const value=validPwmValue();
+ if(value===null)throw Error('PWM permitido: 0 a 100 %.');
+ if(requestedMode!=='PWM'||confirmedMode!=='PWM')throw Error('Primero confirma el modo PWM.');
+ pwmAcknowledged=null;
+ await commandConfirmed('PWM,'+value,p=>p[1]==='PWM'&&Math.abs(Number(p[2])-value)<0.015);
+ pwmAcknowledged=value;
+}
+async function setRequestedMode(mode){
+ if(!online){requestedMode=confirmedMode||'PID';visibleMode();announceMode();return false;}
+ if(last.run||modeBusy){requestedMode=confirmedMode||requestedMode;visibleMode();notice('Detén el motor y termina la configuración antes de cambiar de modo.');return false;}
+ requestedMode=mode;modeBusy=true;pwmAcknowledged=null;visibleMode();announceMode();
+ try{
+   await commandConfirmed('MODE,'+mode,p=>p[1]==='MODE'&&p[2]===mode);
+   confirmedMode=mode;
+   if(mode==='PWM'){await setPwmFromInput();pwmModeInitialized=true;}
+   else pwmModeInitialized=false;
+   modeBusy=false;visibleMode();announceMode();return true;
+ }catch(err){
+   modeBusy=false;requestedMode=confirmedMode||'PID';visibleMode();notice('NO CONFIGURADO · '+err.message);return false;
+ }
+}
+window.fajaSelectMode=setRequestedMode;
+modeInputs.forEach(x=>x.addEventListener('change',()=>{if(x.checked)setRequestedMode(x.value)}));
+$('engFixedPwm').addEventListener('change',async()=>{
+ if(last.run||!online){notice('Detén el motor y conecta ESP32 antes de modificar PWM.');return;}
+ if(modeBusy)return;
+ modeBusy=true;visibleMode();announceMode();
+ try{await setPwmFromInput();modeBusy=false;visibleMode();announceMode();}
+ catch(err){modeBusy=false;visibleMode();notice('PWM NO CONFIGURADO · '+err.message);}
+});
+// Aun si otros módulos habilitan Arrancar, no iniciar con modo/PWM sin confirmar.
+for(const id of ['projRun','plantRun','hmiStart']){
+ $(id)?.addEventListener('click',e=>{
+   if(!modeReady()||last.run){e.preventDefault();e.stopImmediatePropagation();announceMode();}
+ },true);
+}
+visibleMode();announceMode();
 window.fajaTestMetadata=()=>({mode:confirmedMode,kp:$('kp').value,ki:$('ki').value,kd:$('kd').value,testId:$('engTestId').value.replace(/,/g,'_'),diameter:$('engDiameter').value,metaTimestamp:window.fajaDiagnostic?.ms??'',rawRpm:window.fajaDiagnostic?.rawRpm??'',pulseAgeMs:window.fajaDiagnostic?.ageMs??'',pulsePeriodMs:window.fajaDiagnostic?.periodMs??'',pulseCount:window.fajaDiagnostic?.pulses??''});
 const rpmButtons=[...hmi.querySelectorAll('[data-hmi-rpm]')];
 function scaleSpeed(rpm){const d=Number($('engDiameter').value);return d>0&&Number.isFinite(d)?Math.PI*d/100*rpm/60:null}
@@ -102,29 +193,20 @@ function refreshHmi(){
  pilot('hmiPilotMotor',active,'green');
  pilot('hmiPilotSensor',!stale&&lastTelemetry.rpm>0,'green');
  pilot('hmiPilotAlarm',!stale&&(emergency||lastTelemetry.fault),'red');
- $('hmiStart').disabled=!online||emergency||stale;
+ $('hmiStart').disabled=!online||emergency||stale||!modeReady()||!!last.run;
+ visibleMode();
  rpmButtons.forEach(b=>b.classList.toggle('selected',Number(b.dataset.hmiRpm)===Number($('projTarget').value)));
 }
 setInterval(refreshHmi,300);
 $('engDiameter').addEventListener('input',refreshHmi);
-$('engModeApply').addEventListener('click',async()=>{
- if(!online)return notice('Conecta primero el ESP32.');
- if(last.run)return notice('Detén el motor para cambiar de modo.');
- const mode=document.querySelector('[name="engMode"]:checked').value;
- try{await send('MODE,'+mode);notice('Cambio solicitado: '+mode+'; esperando ACK.')}catch(e){notice(e.message)}
-});
-$('engPwmApply').addEventListener('click',async()=>{
- if(!online||confirmedMode!=='PWM')return notice('Activa el modo PWM con el motor detenido y espera confirmación.');
- const value=Number($('engFixedPwm').value);
- if(!Number.isFinite(value)||value<0||value>100)return notice('PWM permitido: 0 a 100 %.');
- try{await send('PWM,'+value);notice('PWM de ensayo solicitado: '+value+' %.')}catch(e){notice(e.message)}
-});
+// El modo se aplica automáticamente al seleccionar radio; el PWM, al confirmar su campo.
 $('hmiStart').addEventListener('click',async()=>{
  if(!online||emergency)return notice('No se puede iniciar. Comprueba el estado del ESP32.');
  try{
    if(last.run&&confirmedMode==='PWM')return notice('Detén el ensayo PWM antes de operar la HMI.');
-   if(!last.run){await send('MODE,PID');confirmedMode='PID';}
-   await apply();await send('RUN,1');notice('Inicio solicitado; esperando respuesta de la planta.');
+   if(!modeReady())return notice('Modo o PWM sin confirmar. Espera la confirmación ESP32.');
+   if(requestedMode==='PID')await apply();
+   await send('RUN,1');notice('Inicio solicitado en '+requestedMode+'; esperando respuesta de la planta.');
  }catch(e){notice('Error de inicio: '+e.message)}
 });
 $('hmiStop').addEventListener('click',()=>{if(online)send('STOP').then(()=>notice('Parada solicitada.')).catch(e=>notice(e.message));else notice('Sin USB: usa el corte físico del motor.')});
@@ -136,8 +218,11 @@ $('hmiReset').addEventListener('click',async()=>{try{await send('RESET_ESTOP');n
 rpmButtons.forEach(b=>b.addEventListener('click',async()=>{
  const v=Number(b.dataset.hmiRpm);
  if(confirmedMode==='PWM'&&last.run)return notice('Primero detén la identificación PWM.');
- try{if(!last.run&&online){await send('MODE,PID');confirmedMode='PID';}
- setTarget(v);if(online)await apply();notice('Consigna seleccionada: '+v+' RPM.');refreshHmi();}
+ try{
+   if(online&&requestedMode!=='PID'){
+     const changed=await setRequestedMode('PID');if(!changed)return;
+   }
+   setTarget(v);if(online)await apply();notice('Consigna PID seleccionada: '+v+' RPM.');refreshHmi();}
  catch(e){notice(e.message)}
 }));
 
@@ -154,6 +239,12 @@ window.fajaPlot={set:true,rpm:true,pwm:false,err:false,type:'line'};
 plots.querySelectorAll('[data-plot]').forEach(input=>input.addEventListener('change',()=>{window.fajaPlot[input.dataset.plot]=input.checked;drawAll()}));
 $('engChartType').addEventListener('change',e=>{window.fajaPlot.type=e.target.value;drawAll()});
 
+const oldConn=conn;
+conn=function(value){
+ oldConn(value);
+ if(!value){confirmedMode=null;pwmAcknowledged=null;pwmModeInitialized=false;modeBusy=false;requestedMode='PID';lastPlotMode=null;}
+ visibleMode();announceMode();
+};
 const oldReceive=receive;
 receive=function(line){
  oldReceive(line);
@@ -162,15 +253,33 @@ receive=function(line){
   const n=p.slice(1,8).map(Number);
   if(n.every(Number.isFinite)){lastTelemetry={ms:n[0],set:n[1],rpm:n[2],err:n[3],pwm:n[4],run:n[5],fault:n[6]};lastTelemetryAt=Date.now();}
  }else if(p[0]==='META'&&p.length>=8){
-  confirmedMode=p[2]==='PWM'?'PWM':'PID';emergency=p[7]==='1';
+  const deviceMode=p[2]==='PWM'?'PWM':'PID';
+  if(!modeBusy){
+   if(confirmedMode!==deviceMode){confirmedMode=deviceMode;pwmAcknowledged=null;}
+   if(requestedMode!==deviceMode)requestedMode=deviceMode;
+  }
+  emergency=p[7]==='1';
   window.fajaDiagnostic={ms:Number(p[1]),rawRpm:Number(p[3]),ageMs:Number(p[4]),periodMs:Number(p[5]),pulses:Number(p[6])};
   const d=$('engMeta');if(d)d.textContent='RPM sin filtrar: '+p[3]+' · Tiempo desde pulso: '+p[4]+' ms · Periodo: '+p[5]+' ms · Pulsos: '+p[6];
+  // Si abrimos la web con PWM ya seleccionado en el ESP32, programarlo una vez.
+  if(deviceMode==='PWM'&&!pwmModeInitialized&&!last.run&&!modeBusy){
+   pwmModeInitialized=true;modeBusy=true;visibleMode();announceMode();
+   setPwmFromInput().then(()=>{modeBusy=false;visibleMode();announceMode()})
+    .catch(e=>{modeBusy=false;visibleMode();notice('PWM NO CONFIGURADO · '+e.message)});
+  }
  }else if(p[0]==='ACK'){
-  if(p[1]==='MODE'){confirmedMode=p[2];notice('Modo confirmado por ESP32: '+p[2]);}
-  if(p[1]==='ESTOP'){emergency=true;notice('Parada software confirmada; rearme obligatorio.');}
-  if(p[1]==='RESET_ESTOP'){emergency=false;notice('Rearme confirmado.');}
- }else if(p[0]==='ERR')notice('ESP32 rechazó orden: '+line);
+  if(p[1]==='MODE')confirmedMode=p[2];
+  if(p[1]==='ESTOP')emergency=true;
+  if(p[1]==='RESET_ESTOP')emergency=false;
+ }
+ if(ackRequest&&((p[0]==='ACK'&&ackRequest.matcher(p))||p[0]==='ERR')){
+   const pending=ackRequest;ackRequest=null;clearTimeout(pending.timer);
+   if(p[0]==='ERR')pending.reject(Error('ESP32 rechazó '+line));
+   else pending.resolve(line);
+ }
+ if(p[0]==='ERR'&&!modeBusy)notice('Orden rechazada: '+line);
  else if(p[0]==='FAULT')notice('Falla comunicada por ESP32: '+line);
+ if(p[0]==='DATA'||p[0]==='META'||p[0]==='ACK')announceMode();
  refreshHmi();
 };
 function mappedPlot(canvas){

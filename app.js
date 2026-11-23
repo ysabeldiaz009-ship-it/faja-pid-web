@@ -22,7 +22,7 @@ for(const id of ['projSlider','projTarget','plantSlider','plantTarget'])el(id).o
 function readConfig(){const v=[Number(el('projTarget').value),Number(el('kp').value),Number(el('ki').value),Number(el('kd').value)];if(v.some(x=>!Number.isFinite(x))||v[0]<0||v[0]>200||v.slice(1).some(x=>x<0||x>10))throw Error('Referencia 0–200 RPM; Kp/Ki/Kd 0–10');return v}
 async function send(line){if(!online)throw Error('ESP32 desconectado');if(window.fajaUSB)return window.fajaUSB.send(line);if(!writer)throw Error('Puerto USB no disponible');queue=queue.catch(()=>{}).then(()=>writer.write(new TextEncoder().encode(line+'\n')));await queue}
 async function apply(){const cfg=readConfig();await send('SET,'+cfg.join(','));log('SET enviado al ESP32')}
-async function start(){try{await apply();await send('RUN,1');log('Arranque solicitado; esperando confirmación del ESP32')}catch(e){log('No se pudo arrancar: '+e.message)}}
+async function start(){try{if(!window.fajaModeReady?.())throw Error('Modo PID/PWM no confirmado por ESP32');if(window.fajaIsPidMode?.())await apply();await send('RUN,1');log('Arranque solicitado; esperando confirmación del ESP32')}catch(e){log('No se pudo arrancar: '+e.message)}}
 async function stop(){try{await send('STOP');log('Parada solicitada; esperando confirmación')}catch(e){log('No se pudo detener: '+e.message)}}
 el('apply').onclick=()=>apply().catch(e=>log(e.message));
 el('projRun').onclick=el('plantRun').onclick=start;
