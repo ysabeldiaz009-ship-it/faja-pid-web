@@ -9,7 +9,7 @@
  let sequence=Math.max(0,...trials.map(x=>parseInt(String(x.id).match(/^E(\d+)$/)?.[1]||'0',10)));
  function persist(){try{sessionStorage.setItem(KEY,JSON.stringify(trials.slice(-MAX)))}catch(e){log('Almacenamiento temporal lleno: conserva el CSV de tus ensayos.');}}
  function fmt(v,n=1){return Number.isFinite(v)?Number(v).toFixed(n):'—'}
- function currentMeta(ms){return active?{trialId:active.id,trialStart:active.started,elapsedSec:Math.max(0,(ms-active.firstMs)/1000).toFixed(2)}:{}}
+ function currentMeta(ms){return active?{trialId:active.id,trialStart:active.started,elapsedSec:Math.max(0,(ms-active.firstMs)/1000).toFixed(2),supplyV:active.supplyV,load:active.load,notes:active.notes}:{}}
  function nextId(){return 'E'+String(++sequence).padStart(2,'0')}
  function list(){return active?[...trials,active]:trials}
  function viewed(){return list().find(x=>x.id===selected)||null}
@@ -25,7 +25,8 @@
    if(active)return;
    const id=nextId(),started=new Date().toISOString();
    const mode=window.fajaTestMetadata?.().mode||document.querySelector('[name="engMode"]:checked')?.value||'PID';
-   active={id,started,firstMs:ms,lastMs:ms,ref,mode,kp:$('kp').value,ki:$('ki').value,kd:$('kd').value,
+   const condition=window.fajaRunConditions?.()||{};
+   active={id,started,firstMs:ms,lastMs:ms,ref,mode,kp:$('kp').value,ki:$('ki').value,kd:$('kd').value,...condition,
        samples:[],ended:null,reason:'',status:'running'};
    selected=id;
    if(window.fajaResetModelTrial)window.fajaResetModelTrial();
