@@ -1,4 +1,5 @@
 
+.hmi-footnote,.hmi-safety{display:none!important}
 /* Industrial HMI facelift - operator-oriented control desk (WinCC/IDEC inspired).
    Real actuator/sensor states only. Virtual metrics remain explicitly labeled. */
 #plantScreen{background:#101820!important}
